@@ -10,4 +10,5 @@ stack.yaml.lock
 *.prof
 *.dat
 *.old
+*.out
 bin
