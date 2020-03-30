@@ -22,12 +22,11 @@ main = do
                     . replaceTanb
                     . replaceTYPE
                     . replaceECM) str -- (take 25 str)
-    withFile "output.dat" WriteMode $ \h ->
+    withFile "input.dat" WriteMode $ \h ->
         mapM_ (TIO.hPutStrLn h) str'
 
-    putStrLn sushipath
-    doesFileExist sushipath >>= print
-    executable <$> getPermissions sushipath >>= print
+    putStrLn $ "-- We use SuSHi: " ++ sushipath
+    isValidExecutable sushipath >>= print
   where
     replaceECM   = T.replace "$ECM"     (toFixed 1 1.30e+4)
     replaceTYPE  = T.replace "$TYPE"    (T.pack (show (2 :: Int)))
@@ -37,3 +36,9 @@ main = do
     replaceMA    = T.replace "$MA"      (toExponential 7 500)
     replaceMCH   = T.replace "$MCH"     (toExponential 7 300)
     replaceSinBA = T.replace "$SINBA"   (toExponential 7 $ sqrt (1 - 0.1 ** 2))
+
+isValidExecutable :: FilePath -> IO Bool
+isValidExecutable exe = do
+    exists <- doesFileExist exe
+    isExec <- executable <$> getPermissions exe
+    return $ exists && isExec
