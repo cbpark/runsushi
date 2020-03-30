@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 30ed05f756bed032e49e5ea0900225ca3134203356ad7f746f5165a8c9bebad5
+-- hash: e129ff43e41b327d34e5c24bd21f84aabf59effa8a6fee64d7ea7b10dc9502b3
 
 name:           runsushi
 version:        0.0.0.0
@@ -17,6 +17,8 @@ maintainer:     cbpark@gmail.com
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
+extra-source-files:
+    input_template.in
 
 source-repository head
   type: git

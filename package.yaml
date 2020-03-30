@@ -1,11 +1,12 @@
-name:         runsushi
-version:      "0.0.0.0"
-synopsis:     Processing inputs and outputs of SusHi
-author:       Chan Beom Park
-maintainer:   cbpark@gmail.com
-license-file: LICENSE
-github:       cbpark/runsushi
-category:     Physics
+name:               runsushi
+version:            "0.0.0.0"
+synopsis:           Processing inputs and outputs of SusHi
+author:             Chan Beom Park
+maintainer:         cbpark@gmail.com
+license-file:       LICENSE
+github:             cbpark/runsushi
+category:           Physics
+extra-source-files: input_template.in
 
 ghc-options: -Wall -Wcompat
 
