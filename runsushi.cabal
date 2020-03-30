@@ -1,25 +1,36 @@
-cabal-version:       2.2
-name:                runsushi
-version:             0.0.0.0
-synopsis:            For processing inputs and outputs of SusHi
--- description:
-homepage:            https://github.com/cbpark/runsushi
-bug-reports:         https://github.com/cbpark/runsushi/issues
-license:             BSD-3-Clause
-license-file:        LICENSE
-author:              Chan Beom Park
-maintainer:          cbpark@gmail.com
-copyright:           (c) 2020 Chan Beom Park
-category:            Physics
-extra-source-files:  README.md
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 9684d4a6f25eb71a49119b852d0b6616b91fd59be546cc0596904e8c15cad208
+
+name:           runsushi
+version:        0.0.0.0
+synopsis:       Processing inputs and outputs of SusHi
+category:       Physics
+homepage:       https://github.com/cbpark/runsushi#readme
+bug-reports:    https://github.com/cbpark/runsushi/issues
+author:         Chan Beom Park
+maintainer:     cbpark@gmail.com
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/cbpark/runsushi
 
 executable runsushi
-  main-is:             runsushi.hs
-  -- other-modules:
-  -- other-extensions:
-  build-depends:       base >= 4.12.0.0
-                     , double-conversion
-                     , text
-  hs-source-dirs:      src
-  default-language:    Haskell2010
-  ghc-options:         -Wall -Wcompat
+  main-is: runsushi.hs
+  other-modules:
+      Paths_runsushi
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat
+  build-depends:
+      base >=4.12.0.0 && <5
+    , double-conversion
+    , text
+  default-language: Haskell2010
