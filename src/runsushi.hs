@@ -6,13 +6,21 @@ import           Data.Double.Conversion.Text
 import qualified Data.Text                   as T
 import qualified Data.Text.IO                as TIO
 import           System.Directory
+-- import           System.FilePath             ((</>))
+import           System.Process              (readProcess)
 
+import           Control.Monad               (unless)
 import           System.Environment          (getArgs)
+import           System.Exit                 (die)
 import           System.IO                   (IOMode (..), withFile)
 
 main :: IO ()
 main = do
-    [infile, sushipath] <- getArgs
+    [sushi, infile] <- getArgs
+    putStrLn $ "-- We use SuSHi: " ++ sushi
+    validExe <- isValidExecutable sushi
+    unless validExe $ die ("-- Invalid SuSHi executable: " ++ sushi)
+
     str <- T.lines <$> TIO.readFile infile
     let str' = map (replaceSinBA
                     . replaceMCH
@@ -22,11 +30,22 @@ main = do
                     . replaceTanb
                     . replaceTYPE
                     . replaceECM) str -- (take 25 str)
-    withFile "input.dat" WriteMode $ \h ->
-        mapM_ (TIO.hPutStrLn h) str'
 
-    putStrLn $ "-- We use SuSHi: " ++ sushipath
-    isValidExecutable sushipath >>= print
+    -- tmpdir <- getTemporaryDirectory
+    -- let inpF = tmpdir </> "input.dat"
+    --     outF = tmpdir </> "output.dat"
+    let inpF = "input.dat"
+        outF = "output.dat"
+
+    withFile inpF WriteMode $ \h -> mapM_ (TIO.hPutStrLn h) str'
+
+    outputStr <- readProcess sushi [inpF, outF] []
+    putStrLn outputStr
+
+    -- putStrLn $ "-- The temporary files will be removed: "
+    --     ++ inpF ++ ", " ++ outF
+    -- mapM_ removeFile [inpF, outF]
+
   where
     replaceECM   = T.replace "$ECM"     (toFixed 1 1.30e+4)
     replaceTYPE  = T.replace "$TYPE"    (T.pack (show (2 :: Int)))
