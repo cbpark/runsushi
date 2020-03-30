@@ -5,13 +5,14 @@ module Main where
 import           Data.Double.Conversion.Text
 import qualified Data.Text                   as T
 import qualified Data.Text.IO                as TIO
+import           System.Directory
 
 import           System.Environment          (getArgs)
 import           System.IO                   (IOMode (..), withFile)
 
 main :: IO ()
 main = do
-    infile <- head <$> getArgs
+    [infile, sushipath] <- getArgs
     str <- T.lines <$> TIO.readFile infile
     let str' = map (replaceSinBA
                     . replaceMCH
@@ -23,6 +24,10 @@ main = do
                     . replaceECM) str -- (take 25 str)
     withFile "output.dat" WriteMode $ \h ->
         mapM_ (TIO.hPutStrLn h) str'
+
+    putStrLn sushipath
+    doesFileExist sushipath >>= print
+    executable <$> getPermissions sushipath >>= print
   where
     replaceECM   = T.replace "$ECM"     (toFixed 1 1.30e+4)
     replaceTYPE  = T.replace "$TYPE"    (T.pack (show (2 :: Int)))
