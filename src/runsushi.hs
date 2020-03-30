@@ -7,6 +7,7 @@ import qualified Data.Text                   as T
 import qualified Data.Text.IO                as TIO
 
 import           System.Environment          (getArgs)
+import           System.IO                   (IOMode (..), withFile)
 
 main :: IO ()
 main = do
@@ -20,7 +21,8 @@ main = do
                     . replaceTanb
                     . replaceTYPE
                     . replaceECM) str -- (take 25 str)
-    mapM_ TIO.putStrLn str'
+    withFile "output.dat" WriteMode $ \h ->
+        mapM_ (TIO.hPutStrLn h) str'
   where
     replaceECM   = T.replace "$ECM"     (toFixed 1 1.30e+4)
     replaceTYPE  = T.replace "$TYPE"    (T.pack (show (2 :: Int)))
