@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.HEP.SLHA (SLHASpectrum (..), slhaSpec) where
+module Data.HEP.SLHA (SLHASpectrum (..), slhaSpec, getSLHASpec) where
 
 import           Data.Attoparsec.Text
 import           Data.IntMap          (IntMap)
@@ -8,9 +8,11 @@ import qualified Data.IntMap          as IntMap
 import           Data.Map             (Map)
 import qualified Data.Map             as Map
 import           Data.Text            (Text)
+import           Data.Text.IO         (hGetContents)
 
 import           Control.Monad        (void)
 import           Prelude              hiding (takeWhile)
+import           System.IO            (IOMode (..), withFile)
 
 newtype SLHASpectrum = SLHASpectrum (Map Text SLHAEntries) deriving Show
 
@@ -36,7 +38,6 @@ slhaBlock = do
 -- Example usage:
 --
 -- > import Data.Attoparsec.Text (parseOnly)
--- > import Data.Map             (toList)
 -- > import Data.Text.IO         (hGetContents)
 -- >
 -- > import Data.HEP.SLHA
@@ -51,9 +52,15 @@ slhaBlock = do
 -- >         contents <- hGetContents h
 -- >         case parseOnly slhaSpec contents of
 -- >             Left err                    -> putStrLn err
--- >             Right (SLHASpectrum blocks) -> mapM_ print (toList blocks)
+-- >             Right (SLHASpectrum blocks) -> mapM_ print blocks
 slhaSpec :: Parser SLHASpectrum
 slhaSpec = SLHASpectrum . Map.fromAscList <$> many' slhaBlock
+
+getSLHASpec :: FilePath -> IO (Either String SLHASpectrum)
+getSLHASpec fin =
+    withFile fin ReadMode $ \h -> do
+        contents <- hGetContents h
+        return (parseOnly slhaSpec contents)
 
 textV :: Parser Text
 textV = takeWhile (\c -> c /= ' ' && c /= '#' && (not . isEndOfLine) c)

@@ -12,9 +12,10 @@ ghc-options: -Wall -Wcompat
 
 dependencies:
   - base >= 4.12.0.0 && < 5
+  - attoparsec
+  - containers
   - directory
   - double-conversion
-  # - filepath
   - process
   - text
 
@@ -22,10 +23,3 @@ executables:
   runsushi:
     main: runsushi.hs
     source-dirs: src
-
-  parsetest:
-    main: parsetest.hs
-    source-dirs: src
-    dependencies:
-      - attoparsec
-      - containers

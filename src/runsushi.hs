@@ -9,6 +9,8 @@ import           System.Directory
 -- import           System.FilePath             ((</>))
 import           System.Process              (readProcess)
 
+import           Data.HEP.SLHA               (SLHASpectrum (..), getSLHASpec)
+
 import           Control.Monad               (unless)
 import           System.Environment          (getArgs)
 import           System.Exit                 (die)
@@ -41,6 +43,12 @@ main = do
 
     outputStr <- readProcess sushi [inpF, outF] []
     putStrLn outputStr
+
+    slhaSpec <- getSLHASpec outF
+
+    case slhaSpec of
+        Left err                    -> die err
+        Right (SLHASpectrum blocks) -> mapM_ print blocks
 
     -- putStrLn $ "-- The temporary files will be removed: "
     --     ++ inpF ++ ", " ++ outF
