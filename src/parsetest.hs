@@ -28,7 +28,7 @@ entry :: Parser SLHAEntry
 entry = do
     skipComment >> skipSpace
     idx <- signed decimal <* skipSpace
-    val <- takeWhile (\c -> c /= ' ' && c /= '#' && (not . isEndOfLine) c)
+    val <- textV
     return $ SLHAEntry (idx, val)
 
 data SLHABlock = SLHABlock { blockName   :: Text
@@ -38,14 +38,16 @@ data SLHABlock = SLHABlock { blockName   :: Text
 slhaBlock :: Parser SLHABlock
 slhaBlock = do
     skipComment >> skipSpace
-    name <- asciiCI "block" >> skipSpace
-            *> takeWhile (\c -> c /= ' ' && c /= '#' && (not . isEndOfLine) c)
+    name <- asciiCI "block" >> skipSpace *> textV
     skipComment >> skipSpace
     entries <- many' $ entry <* skipTillEnd
     return $ SLHABlock name entries
 
 slha :: Parser [SLHABlock]
 slha = many' slhaBlock
+
+textV :: Parser Text
+textV = takeWhile (\c -> c /= ' ' && c /= '#' && (not . isEndOfLine) c)
 
 skipComment :: Parser ()
 skipComment = void $ many' (char '#' >> skipTillEnd)
