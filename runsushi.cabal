@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 86464611aed1674391a87ad7cadcb60898e5dfd8c83907b3020d9c70a9a0e1de
+-- hash: 54ff0ff7639fee963e3bd406751a9b99f7d7ea41bf9f2ca02cab6c712f6b55b6
 
 name:           runsushi
 version:        0.0.0.0
@@ -23,24 +23,6 @@ extra-source-files:
 source-repository head
   type: git
   location: https://github.com/cbpark/runsushi
-
-executable parsetest
-  main-is: parsetest.hs
-  other-modules:
-      Data.HEP.SLHA
-      Paths_runsushi
-  hs-source-dirs:
-      src
-  ghc-options: -Wall -Wcompat
-  build-depends:
-      attoparsec
-    , base >=4.12.0.0 && <5
-    , containers
-    , directory
-    , double-conversion
-    , process
-    , text
-  default-language: Haskell2010
 
 executable runsushi
   main-is: runsushi.hs
