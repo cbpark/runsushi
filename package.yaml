@@ -26,4 +26,6 @@ executables:
   parsetest:
     main: parsetest.hs
     source-dirs: src
-    dependencies: attoparsec
+    dependencies:
+      - attoparsec
+      - containers

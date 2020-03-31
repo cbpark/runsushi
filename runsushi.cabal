@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8d2984a8383dc22098dd87ab57a7de97fc656769c10f07510611139b2b98e516
+-- hash: 57737a3da57a9ae4761b8644633f36db2f156faca1c674ca2356ef782caaa4af
 
 name:           runsushi
 version:        0.0.0.0
@@ -27,6 +27,7 @@ source-repository head
 executable parsetest
   main-is: parsetest.hs
   other-modules:
+      Data.HEP.SLHA
       Paths_runsushi
   hs-source-dirs:
       src
@@ -34,6 +35,7 @@ executable parsetest
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
+    , containers
     , directory
     , double-conversion
     , process
@@ -43,6 +45,7 @@ executable parsetest
 executable runsushi
   main-is: runsushi.hs
   other-modules:
+      Data.HEP.SLHA
       Paths_runsushi
   hs-source-dirs:
       src
