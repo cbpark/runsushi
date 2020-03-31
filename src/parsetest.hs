@@ -15,18 +15,12 @@ import           System.IO            (IOMode (..), withFile)
 main :: IO ()
 main = do
     infile <- head <$> getArgs
-    -- str <- T.lines <$> TIO.readFile infile
-    -- mapM_ TIO.putStrLn str
 
-    -- print $ parseOnly entry
-    --         (T.pack "         1     7.01656687E-01   # ggh XS in pb\n")
-    -- print $ parseOnly slhaBlock
-    --         (T.pack "Block SUSHIggh # Bon appetit\n 1     7.01656687E-01   # ggh XS in pb\n       101     2.38358724E-04   # +/- integ. error: ggh XS in pb\n")
-    -- print $ parseOnly slhaBlock
-    --         (T.pack "Block SUSHIinfo\n 1   1.7.0        # SusHi version\n 5   1.7.0        # 2HDMC version\n")
     withFile infile ReadMode $ \h -> do
         contents <- TIO.hGetContents h
-        mapM_ print (parseOnly slha contents)
+        case parseOnly slha contents of
+            Left err     -> putStrLn err
+            Right blocks -> mapM_ print blocks
 
 newtype SLHAEntry = SLHAEntry (Int, Text) deriving Show
 
