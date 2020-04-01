@@ -7,7 +7,8 @@
 
 module Main where
 
-import           Data.HEP.SLHA
+import           HEP.Data.SLHA
+import           HEP.Data.THDM
 
 import           Data.Double.Conversion.Text
 import qualified Data.Text                   as T
@@ -16,8 +17,8 @@ import           Options.Generic
 import           System.Directory
 import           System.Process              (readProcess)
 
-import           Control.Monad               (unless)
--- import           Data.Maybe                  (fromMaybe)
+import           Control.Monad               (unless, when)
+import           Data.Maybe                  (fromMaybe)
 import           System.Environment          (getArgs)
 import           System.Exit                 (die)
 import           System.IO                   (IOMode (..), withFile)
@@ -27,6 +28,10 @@ main = do
     -- inp <- unwrapRecord "Run SuSHi to obtain the cross sections"
 
     -- let mdtyp = fromMaybe 2 (mtype inp)
+    --     mdtypVal | mdtyp == 1 = TypeI
+    --              | mdtyp == 2 = TypeII
+    --              | otherwise  = UnknownType
+    -- when (mdtypVal == UnknownType) $ die "The type must be either 1 or 2."
 
     [sushiPath, infile] <- getArgs
     putStrLn $ "-- We use SuSHi: " ++ sushiPath

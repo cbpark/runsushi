@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.HEP.SLHA
+module HEP.Data.SLHA
     (
       SLHASpectrum (..)
     , slhaSpec

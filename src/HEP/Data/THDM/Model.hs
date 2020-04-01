@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Data.HEP.THDM.Model where
+module HEP.Data.THDM.Model where
 
 import Data.Double.Conversion.Text (toFixed)
 import Data.Text.Lazy.Builder      (Builder, fromText, singleton)

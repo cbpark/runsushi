@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8f181565158c36af6da8ceaa41a5c70252c47c6db406825cdc00aa2ecb58fa1e
+-- hash: 461da24aa80244264024d0971ab1e971db2530173660e50f81ca326e0139040c
 
 name:           runsushi
 version:        0.0.0.0
@@ -27,8 +27,9 @@ source-repository head
 executable runsushi
   main-is: runsushi.hs
   other-modules:
-      Data.HEP.SLHA
-      Data.HEP.THDM.Model
+      HEP.Data.SLHA
+      HEP.Data.THDM
+      HEP.Data.THDM.Model
       Paths_runsushi
   hs-source-dirs:
       src
