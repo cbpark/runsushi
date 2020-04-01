@@ -7,7 +7,7 @@ import           Data.IntMap          (IntMap)
 import qualified Data.IntMap          as IntMap
 import           Data.Map             (Map)
 import qualified Data.Map             as Map
-import           Data.Text            (Text)
+import           Data.Text            (Text, toCaseFold)
 import           Data.Text.IO         (hGetContents)
 
 import           Control.Monad        (void)
@@ -31,7 +31,7 @@ slhaBlock = do
     blockName <- asciiCI "block" >> skipSpace *> textV
     skipComment >> skipSpace
     entries <- many' $ entry <* skipTillEnd
-    return (blockName, IntMap.fromAscList entries)
+    return (toCaseFold blockName, IntMap.fromList entries)
 
 -- |
 --
@@ -54,7 +54,7 @@ slhaBlock = do
 -- >             Left err                    -> putStrLn err
 -- >             Right (SLHASpectrum blocks) -> mapM_ print blocks
 slhaSpec :: Parser SLHASpectrum
-slhaSpec = SLHASpectrum . Map.fromAscList <$> many' slhaBlock
+slhaSpec = SLHASpectrum . Map.fromList <$> many' slhaBlock
 
 getSLHASpec :: FilePath -> IO (Either String SLHASpectrum)
 getSLHASpec fin =
