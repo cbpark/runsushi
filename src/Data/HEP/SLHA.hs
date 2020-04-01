@@ -5,7 +5,8 @@ module Data.HEP.SLHA
       SLHASpectrum (..)
     , slhaSpec
     , getSLHASpec
-    , getEntryOf
+    , entryOf
+    , numValueOf
     ) where
 
 import           Data.Attoparsec.Text
@@ -19,6 +20,7 @@ import           Data.Text.IO         (hGetContents)
 import qualified Data.Text.Read       as TR
 
 import           Control.Monad        (void)
+import           Data.Maybe           (fromMaybe)
 import           Prelude              hiding (takeWhile)
 import           System.IO            (IOMode (..), withFile)
 
@@ -70,16 +72,19 @@ getSLHASpec fin =
         contents <- hGetContents h
         return (parseOnly slhaSpec contents)
 
-getEntryOf :: Text -> Int -> SLHASpectrum -> Maybe Double
-getEntryOf key i (SLHASpectrum blocks) = do
+entryOf :: Text -> Int -> SLHASpectrum -> Maybe Double
+entryOf key i (SLHASpectrum blocks) = do
     block <- Map.lookup (T.toCaseFold key) blocks
     case IntMap.lookup i block of
         Just x  -> case TR.double x of
-                       Left _           -> Nothing
+                       Left _                  -> Nothing
                        Right (num, unconsumed) -> if T.null unconsumed
                                                   then return num
                                                   else Nothing
         Nothing -> Nothing
+
+numValueOf :: Text -> Int -> SLHASpectrum -> Double
+numValueOf key i spec = fromMaybe 0 (entryOf key i spec)
 
 textV :: Parser Text
 textV = takeWhile (\c -> c /= ' ' && c /= '#' && (not . isEndOfLine) c)

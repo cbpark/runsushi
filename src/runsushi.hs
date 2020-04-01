@@ -46,10 +46,10 @@ main = do
     slha <- getSLHASpec outF
     case slha of
         Left err     -> die err
-        Right blocks -> do let info = getEntryOf "SUSHIinfo" 1 blocks
-                               xsGGH = getEntryOf "SUSHIggh" 1 blocks
-                               xsBBH = getEntryOf "SUSHIbbh" 1 blocks
-                           mapM_ print [info, xsGGH, xsBBH]
+        Right blocks -> do let xsGGH = numValueOf "SUSHIggh" 1 blocks
+                               xsBBH = numValueOf "SUSHIbbh" 1 blocks
+                               xs = xsGGH + xsBBH
+                           print $ fmap (toExponential 8) [xs, xsGGH, xsBBH]
 
     -- putStrLn $ "-- The temporary files will be removed: "
     --     ++ inpF ++ ", " ++ outF
