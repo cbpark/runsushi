@@ -1,8 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 
 module Data.HEP.THDM.Model where
 
-import Data.Double.Conversion.Text
+import Data.Double.Conversion.Text (toFixed)
 import Data.Text.Lazy.Builder      (Builder, fromText, singleton)
 
 data THDMType = TypeI | TypeII | UnknownType deriving (Eq, Show)
@@ -15,11 +16,23 @@ data InputParam = InputParam { _mdtyp :: THDMType
                              , _angs  :: Angles
                              } deriving Show
 
+renderInputParam :: InputParam -> Builder
+renderInputParam InputParam {..} =
+    renderTHDMType _mdtyp
+    <> space <> renderMass _mS
+    <> space <> renderMass _mH
+    <> space <> renderMass _mA
+    <> space <> renderMass _mHp
+    <> space <> renderAngles _angs
+
 renderTHDMType :: THDMType -> Builder
 renderTHDMType typ = let typ' | typ == TypeI  = '1'
                               | typ == TypeII = '2'
                               | otherwise     = '0'
                      in singleton typ'
+
+renderMass :: Double -> Builder
+renderMass = fromText . toFixed 2
 
 newtype Angles = Angles (Double, Double) deriving Show
 
