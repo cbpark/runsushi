@@ -1,6 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.HEP.SLHA (SLHASpectrum (..), slhaSpec, getSLHASpec) where
+module Data.HEP.SLHA
+    (
+      SLHASpectrum (..)
+    , slhaSpec
+    , getSLHASpec
+    , getEntryOf
+    ) where
 
 import           Data.Attoparsec.Text
 import           Data.IntMap          (IntMap)
@@ -61,6 +67,13 @@ getSLHASpec fin =
     withFile fin ReadMode $ \h -> do
         contents <- hGetContents h
         return (parseOnly slhaSpec contents)
+
+-- getBlockOf :: Text -> SLHASpectrum -> Maybe SLHAEntries
+-- getBlockOf key (SLHASpectrum blocks) = Map.lookup (toCaseFold key) blocks
+
+getEntryOf :: Text -> Int -> SLHASpectrum -> Maybe Text
+getEntryOf key i (SLHASpectrum blocks) =
+    Map.lookup (toCaseFold key) blocks >>= IntMap.lookup i
 
 textV :: Parser Text
 textV = takeWhile (\c -> c /= ' ' && c /= '#' && (not . isEndOfLine) c)

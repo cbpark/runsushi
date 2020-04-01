@@ -6,10 +6,9 @@ import           Data.Double.Conversion.Text
 import qualified Data.Text                   as T
 import qualified Data.Text.IO                as TIO
 import           System.Directory
--- import           System.FilePath             ((</>))
 import           System.Process              (readProcess)
 
-import           Data.HEP.SLHA               (SLHASpectrum (..), getSLHASpec)
+import           Data.HEP.SLHA
 
 import           Control.Monad               (unless)
 import           System.Environment          (getArgs)
@@ -44,11 +43,12 @@ main = do
     outputStr <- readProcess sushi [inpF, outF] []
     putStrLn outputStr
 
-    slhaSpec <- getSLHASpec outF
-
-    case slhaSpec of
-        Left err                    -> die err
-        Right (SLHASpectrum blocks) -> mapM_ print blocks
+    slha <- getSLHASpec outF
+    case slha of
+        Left err     -> die err
+        Right blocks -> do let xsGGH = getEntryOf "SUSHIggh" 1 blocks
+                               xsBBH = getEntryOf "SUSHIbbh" 1 blocks
+                           mapM_ print [xsGGH, xsBBH]
 
     -- putStrLn $ "-- The temporary files will be removed: "
     --     ++ inpF ++ ", " ++ outF
