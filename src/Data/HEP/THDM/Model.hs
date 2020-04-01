@@ -1,6 +1,9 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Data.HEP.THDM.Model where
 
-import Data.Text.Lazy.Builder (Builder, singleton)
+import Data.Double.Conversion.Text
+import Data.Text.Lazy.Builder      (Builder, fromText, singleton)
 
 data THDMType = TypeI | TypeII | UnknownType deriving (Eq, Show)
 
@@ -39,3 +42,12 @@ piHalf th | th >=  pi12 = piHalf $! th - pi
           | th <  -pi12 = piHalf $! th + pi
           | otherwise   = th
   where pi12 = pi / 2
+
+renderAngles :: Angles -> Builder
+renderAngles angs =
+    let tanb  = tanBeta angs
+        cosba = cosBetaAlpha angs
+    in (fromText . toFixed 1) tanb <> space <> (fromText . toFixed 2) cosba
+
+space :: Builder
+space = fromText " "
