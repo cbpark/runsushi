@@ -19,6 +19,7 @@ dependencies:
   - optparse-generic
   - process
   - text
+  - vector
 
 executables:
   runsushi:

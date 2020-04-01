@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 461da24aa80244264024d0971ab1e971db2530173660e50f81ca326e0139040c
+-- hash: 89396fc3dbc3a44c411c0686ee5ef1c64f4d63b6b899c6a90ce41b06716a5587
 
 name:           runsushi
 version:        0.0.0.0
@@ -29,7 +29,9 @@ executable runsushi
   other-modules:
       HEP.Data.SLHA
       HEP.Data.THDM
+      HEP.Data.THDM.CrossSection
       HEP.Data.THDM.Model
+      HEP.Data.Util
       Paths_runsushi
   hs-source-dirs:
       src
@@ -43,4 +45,5 @@ executable runsushi
     , optparse-generic
     , process
     , text
+    , vector
   default-language: Haskell2010

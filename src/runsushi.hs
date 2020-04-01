@@ -9,36 +9,59 @@ module Main where
 
 import           HEP.Data.SLHA
 import           HEP.Data.THDM
+import           HEP.Data.Util               (mkPoints)
 
 import           Data.Double.Conversion.Text
 import qualified Data.Text                   as T
 import qualified Data.Text.IO                as TIO
+import qualified Data.Vector                 as V
 import           Options.Generic
 import           System.Directory
 import           System.Process              (readProcess)
 
 import           Control.Monad               (unless, when)
 import           Data.Maybe                  (fromMaybe)
-import           System.Environment          (getArgs)
 import           System.Exit                 (die)
 import           System.IO                   (IOMode (..), withFile)
 
 main :: IO ()
 main = do
-    -- inp <- unwrapRecord "Run SuSHi to obtain the cross sections"
+    inp <- unwrapRecord "Run SuSHi to obtain the cross sections"
 
-    -- let mdtyp = fromMaybe 2 (mtype inp)
-    --     mdtypVal | mdtyp == 1 = TypeI
-    --              | mdtyp == 2 = TypeII
-    --              | otherwise  = UnknownType
-    -- when (mdtypVal == UnknownType) $ die "The type must be either 1 or 2."
+    let sushiexe = sushi inp
+    putStrLn $ "-- We use SuSHi: " ++ sushiexe
+    validExe <- isValidExecutable sushiexe
+    unless validExe $ die ("-- Invalid SuSHi executable: " ++ sushiexe)
 
-    [sushiPath, infile] <- getArgs
-    putStrLn $ "-- We use SuSHi: " ++ sushiPath
-    validExe <- isValidExecutable sushiPath
-    unless validExe $ die ("-- Invalid SuSHi executable: " ++ sushiPath)
+    let mdtyp = fromMaybe 2 (mtype inp)
+        mdtypVal | mdtyp == 1 = TypeI
+                 | mdtyp == 2 = TypeII
+                 | otherwise  = UnknownType
+    when (mdtypVal == UnknownType) $ die "The type must be either 1 or 2."
 
-    str <- T.lines <$> TIO.readFile infile
+    let sqrtS = fromMaybe 13000 (eCM inp)
+        step = fromMaybe 0.5 (stepsize inp)
+        (mHVals, npoints) = mkPoints step (mH inp)
+        mSVals = fromMaybe mHVals (V.replicateM npoints (mS inp))
+        mHpVal = mHp inp
+        mAVal = fromMaybe mHpVal (mA inp)
+        (tanbVal, cosbaVal) = (,) <$> tanb <*> cosba $ inp
+
+    putStrLn $ "-- m_{H+} = " ++ show mHpVal ++ ", tan(beta) = " ++ show tanbVal
+        ++ ", cos(beta - alpha) = " ++ show cosbaVal
+
+    let params = V.zipWith (\mHVal mSVal -> InputParam
+                                            { _mdtyp = mdtypVal
+                                            , _mS    = mSVal
+                                            , _mH    = mHVal
+                                            , _mA    = mAVal
+                                            , _mHp   = mHpVal
+                                            , _angs  = mkAngles tanbVal cosbaVal
+                                            }) mHVals mSVals
+
+    let inputTemplateFile = fromMaybe "input_template.in" (input inp)
+    template <- T.lines <$> TIO.readFile inputTemplateFile
+
     let str' = map (replaceSinBA
                     . replaceMCH
                     . replaceMA
@@ -46,7 +69,7 @@ main = do
                     . replaceM12
                     . replaceTanb
                     . replaceTYPE
-                    . replaceECM) str -- (take 25 str)
+                    . replaceECM) template
 
     -- tmpdir <- getTemporaryDirectory
     -- let inpF = tmpdir </> "input.dat"
@@ -56,7 +79,7 @@ main = do
 
     withFile inpF WriteMode $ \h -> mapM_ (TIO.hPutStrLn h) str'
 
-    outputStr <- readProcess sushiPath [inpF, outF] []
+    outputStr <- readProcess sushiexe [inpF, outF] []
     putStrLn outputStr
 
     slha <- getSLHASpec outF
@@ -64,8 +87,8 @@ main = do
         Left err     -> die err
         Right blocks -> do let xsGGH = numValueOf "SUSHIggh" 1 blocks
                                xsBBH = numValueOf "SUSHIbbh" 1 blocks
-                               xs = xsGGH + xsBBH
-                           print $ fmap (toExponential 8) [xs, xsGGH, xsBBH]
+                               xs = xsH2 xsGGH xsBBH sqrtS
+                           print (renderXSH2 xs)
 
     -- putStrLn $ "-- The temporary files will be removed: "
     --     ++ inpF ++ ", " ++ outF
@@ -89,7 +112,10 @@ isValidExecutable exe = do
 
 data InputArgs w = InputArgs
     { sushi    :: w ::: FilePath       <?> "SuSHi executable (which sushi)"
-    , input    :: w ::: Maybe FilePath <?> "template for the input to SuSHi (input_template.in)"
+    , input    :: w ::: Maybe FilePath <?>
+        "template for the input to SuSHi (default input_template.in)"
+    , eCM      :: w ::: Maybe Double   <?>
+        "center-of-mass energy in GeV (default: 13000 GeV)"
     , mtype    :: w ::: Maybe Int      <?> "model type (either 1 or 2)"
     , mH       :: w ::: [Double]       <?> "heavy Higgs mass"
     , mA       :: w ::: Maybe Double   <?> "CP-odd Higgs mass"
