@@ -15,8 +15,10 @@ import           Data.Map             (Map)
 import qualified Data.Map             as Map
 import           Data.Text            (Text, toCaseFold)
 import           Data.Text.IO         (hGetContents)
+import qualified Data.Text.Read       as TR
 
 import           Control.Monad        (void)
+import           Data.Either          (fromRight)
 import           Prelude              hiding (takeWhile)
 import           System.IO            (IOMode (..), withFile)
 
@@ -71,9 +73,12 @@ getSLHASpec fin =
 -- getBlockOf :: Text -> SLHASpectrum -> Maybe SLHAEntries
 -- getBlockOf key (SLHASpectrum blocks) = Map.lookup (toCaseFold key) blocks
 
-getEntryOf :: Text -> Int -> SLHASpectrum -> Maybe Text
-getEntryOf key i (SLHASpectrum blocks) =
-    Map.lookup (toCaseFold key) blocks >>= IntMap.lookup i
+getEntryOf :: Text -> Int -> SLHASpectrum -> Maybe Double
+getEntryOf key i (SLHASpectrum blocks) = do
+    block <- Map.lookup (toCaseFold key) blocks
+    case IntMap.lookup i block of
+        Just x  -> return . fst $ fromRight (0, "NaN") (TR.double x)
+        Nothing -> Nothing
 
 textV :: Parser Text
 textV = takeWhile (\c -> c /= ' ' && c /= '#' && (not . isEndOfLine) c)
