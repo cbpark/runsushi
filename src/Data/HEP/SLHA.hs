@@ -13,12 +13,12 @@ import           Data.IntMap          (IntMap)
 import qualified Data.IntMap          as IntMap
 import           Data.Map             (Map)
 import qualified Data.Map             as Map
-import           Data.Text            (Text, toCaseFold)
+import           Data.Text            (Text)
+import qualified Data.Text            as T
 import           Data.Text.IO         (hGetContents)
 import qualified Data.Text.Read       as TR
 
 import           Control.Monad        (void)
-import           Data.Either          (fromRight)
 import           Prelude              hiding (takeWhile)
 import           System.IO            (IOMode (..), withFile)
 
@@ -39,7 +39,7 @@ slhaBlock = do
     blockName <- asciiCI "block" >> skipSpace *> textV
     skipComment >> skipSpace
     entries <- many' $ entry <* skipTillEnd
-    return (toCaseFold blockName, IntMap.fromList entries)
+    return (T.toCaseFold blockName, IntMap.fromList entries)
 
 -- |
 --
@@ -70,14 +70,15 @@ getSLHASpec fin =
         contents <- hGetContents h
         return (parseOnly slhaSpec contents)
 
--- getBlockOf :: Text -> SLHASpectrum -> Maybe SLHAEntries
--- getBlockOf key (SLHASpectrum blocks) = Map.lookup (toCaseFold key) blocks
-
 getEntryOf :: Text -> Int -> SLHASpectrum -> Maybe Double
 getEntryOf key i (SLHASpectrum blocks) = do
-    block <- Map.lookup (toCaseFold key) blocks
+    block <- Map.lookup (T.toCaseFold key) blocks
     case IntMap.lookup i block of
-        Just x  -> return . fst $ fromRight (0, "NaN") (TR.double x)
+        Just x  -> case TR.double x of
+                       Left _           -> Nothing
+                       Right (num, unconsumed) -> if T.null unconsumed
+                                                  then return num
+                                                  else Nothing
         Nothing -> Nothing
 
 textV :: Parser Text
