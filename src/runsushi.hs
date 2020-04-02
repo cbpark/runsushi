@@ -8,17 +8,21 @@
 module Main where
 
 import           HEP.Data.THDM
-import           HEP.Data.Util    (mkPoints)
+import           HEP.Data.Util          (mkPoints)
 
-import qualified Data.Vector      as V
-import           Options.Generic
+import           Data.Text.Lazy         (Text, pack)
+import           Data.Text.Lazy.Builder (toLazyText)
+import           Data.Text.Lazy.IO      (hPutStrLn)
+import qualified Data.Vector            as V
+import           Options.Generic        hiding (Text)
 import           System.Directory
-import           System.FilePath  ((</>))
-import           System.Process   (readProcess)
+import           System.FilePath        ((</>))
+import           System.Process         (readProcess)
 
-import           Control.Monad    (unless, when)
-import           Data.Maybe       (fromMaybe)
-import           System.Exit      (die)
+import           Control.Monad          (unless, when)
+import           Data.Maybe             (fromMaybe)
+import           System.Exit            (die)
+import           System.IO              (IOMode (..), withFile)
 
 main :: IO ()
 main = do
@@ -60,11 +64,16 @@ main = do
     createDirectoryIfMissing True workDir
     modelFiles <- V.mapM (mkModelFiles sqrtS workDir inpTmpF) params
 
-    mapM_ (flip (readProcess sushiexe) []) (V.map getFiles modelFiles)
-    getXSH2 sqrtS (V.head modelFiles) >>= print
+    V.mapM_ (flip (readProcess sushiexe) []) (V.map getFiles modelFiles)
 
-    -- removeDirectoryRecursive workDir
-    putStrLn "-- done."
+    let outfile = fromMaybe "output_h2_xs.dat" (output inp)
+    withFile outfile WriteMode $ \h -> do
+        hPutStrLn h header
+        (fmap . fmap) toLazyText (V.mapM (getXSH2 sqrtS) modelFiles)
+            >>= V.mapM_ (hPutStrLn h)
+
+    removeDirectoryRecursive workDir
+    putStrLn $ "-- " ++ outfile ++ " generated."
 
 isValidExecutable :: FilePath -> IO Bool
 isValidExecutable exe = do
@@ -91,3 +100,10 @@ data InputArgs w = InputArgs
 
 instance ParseRecord (InputArgs Wrapped)
 deriving instance Show (InputArgs Unwrapped)
+
+header :: Text
+header = pack $ "# " <>
+         foldl1 (\v1 v2 -> v1 <> ", " <> v2)
+         (zipWith (\n v -> "(" <> show n <> ") " <> v) ([1..] :: [Int])
+          [ "type", "mS", "mH", "mA", "mHp", "tanb", "cosba"
+          , "sqrt(s)", "sigma_tot", "sigma_gg", "sigma_bb" ])
