@@ -11,8 +11,8 @@ import           HEP.Data.SLHA
 import           HEP.Data.THDM
 import           HEP.Data.Util               (mkPoints)
 
-import           Data.Double.Conversion.Text
-import qualified Data.Text                   as T
+-- import           Data.Double.Conversion.Text
+-- import qualified Data.Text                   as T
 import qualified Data.Text.IO                as TIO
 import qualified Data.Vector                 as V
 import           Options.Generic
@@ -59,17 +59,9 @@ main = do
                                             , _angs  = mkAngles tanbVal cosbaVal
                                             }) mHVals mSVals
 
-    let inputTemplateFile = fromMaybe "input_template.in" (input inp)
-    template <- T.lines <$> TIO.readFile inputTemplateFile
+    let inpTmpF = fromMaybe "input_template.in" (input inp)
+    inpStrs <- V.mapM (mkInputFile sqrtS inpTmpF) params
 
-    let str' = map (replaceSinBA
-                    . replaceMCH
-                    . replaceMA
-                    . replaceMH
-                    . replaceM12
-                    . replaceTanb
-                    . replaceTYPE
-                    . replaceECM) template
 
     -- tmpdir <- getTemporaryDirectory
     -- let inpF = tmpdir </> "input.dat"
@@ -77,7 +69,7 @@ main = do
     let inpF = "input.dat"
         outF = "output.dat"
 
-    withFile inpF WriteMode $ \h -> mapM_ (TIO.hPutStrLn h) str'
+    withFile inpF WriteMode $ \h -> TIO.hPutStrLn h (V.head inpStrs)
 
     outputStr <- readProcess sushiexe [inpF, outF] []
     putStrLn outputStr
@@ -93,16 +85,6 @@ main = do
     -- putStrLn $ "-- The temporary files will be removed: "
     --     ++ inpF ++ ", " ++ outF
     -- mapM_ removeFile [inpF, outF]
-
-  where
-    replaceECM   = T.replace "$ECM"     (toFixed 1 1.30e+4)
-    replaceTYPE  = T.replace "$TYPE"    (T.pack (show (2 :: Int)))
-    replaceTanb  = T.replace "$TANBETA" (toFixed 1 2)
-    replaceM12   = T.replace "$M12"     (toExponential 7 50)
-    replaceMH    = T.replace "$MH"      (toExponential 7 500)
-    replaceMA    = T.replace "$MA"      (toExponential 7 500)
-    replaceMCH   = T.replace "$MCH"     (toExponential 7 300)
-    replaceSinBA = T.replace "$SINBA"   (toExponential 7 $ sqrt (1 - 0.1 ** 2))
 
 isValidExecutable :: FilePath -> IO Bool
 isValidExecutable exe = do

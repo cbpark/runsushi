@@ -1,12 +1,29 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module HEP.Data.THDM.Model where
+module HEP.Data.THDM.Model
+    (
+      InputParam (..)
+    , renderInputParam
+
+    , THDMType (..)
+    , Angles
+    , mkAngles
+    , tanBeta
+    , sin2Beta
+    , cosBetaAlpha
+    , sinBetaAlpha
+    ) where
 
 import Data.Double.Conversion.Text (toFixed)
 import Data.Text.Lazy.Builder      (Builder, fromText, singleton)
 
-data THDMType = TypeI | TypeII | UnknownType deriving (Eq, Show)
+data THDMType = TypeI | TypeII | UnknownType deriving Eq
+
+instance Show THDMType where
+    show mdtyp | mdtyp == TypeI  = "1"
+               | mdtyp == TypeII = "2"
+               | otherwise       = "0"
 
 data InputParam = InputParam { _mdtyp :: THDMType
                              , _mS    :: Double
@@ -41,6 +58,9 @@ mkAngles tanb cosba = Angles (tanb, cosba)
 
 tanBeta :: Angles -> Double
 tanBeta (Angles (tanb, _)) = tanb
+
+sin2Beta :: Angles -> Double
+sin2Beta (Angles (tanb, _)) = 2 * tanb / (1 + tanb * tanb)
 
 cosBetaAlpha :: Angles -> Double
 cosBetaAlpha (Angles (_, cosba)) = cosba

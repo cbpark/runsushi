@@ -16,6 +16,7 @@ dependencies:
   - containers
   - directory
   - double-conversion
+  - filepath
   - optparse-generic
   - process
   - text
