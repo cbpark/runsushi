@@ -1,27 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module HEP.Data.THDM.CrossSection where
+module HEP.Data.THDM.CrossSection (getXSH2) where
 
--- import HEP.Data.SLHA               (SLHASpectrum, numValueOf)
--- import HEP.Data.THDM.Model         (InputParam, renderInputParam)
+import HEP.Data.SLHA               (getSLHASpec, numValueOf)
+import HEP.Data.THDM.Model
 
 import Data.Double.Conversion.Text (toExponential, toFixed)
 import Data.Text.Lazy.Builder      (Builder, fromText)
-
--- import Control.Monad.IO.Class      (MonadIO)
 
 data XSH2 = XSH2 { _xs    :: Double
                  , _xsGG  :: Double
                  , _xsBB  :: Double
                  , _sqrtS :: Double
                  }
-
-xsH2 :: Double -> Double -> Double -> XSH2
-xsH2 xsGG xsBB sqrtS = XSH2 { _xs    = xsGG + xsBB
-                            , _xsGG  = xsGG
-                            , _xsBB  = xsBB
-                            , _sqrtS = sqrtS }
 
 renderXSH2 :: XSH2 -> Builder
 renderXSH2 XSH2 {..} =
@@ -31,15 +23,22 @@ renderXSH2 XSH2 {..} =
     <> space <> convXS _xsBB
   where convXS = fromText . toExponential 8
 
--- getXSH2 :: m Double -> InputParam -> SLHASpectrum -> m (Either String Builder)
--- getXSH2 sqrtS inp blocks = do
-    -- let xsGG = numValueOf "SUSHIggh" 1 blocks
-    --     xsBB = numValueOf "SUSHIbbh" 1 blocks
-    --     xs = XSH2 { _xs    = xsGG + xsBB
-    --               , _xsGG  = xsGG
-    --               , _xsBB  = xsBB
-    --               , _sqrtS = sqrtS }
-    -- in renderInputParam inp <> space <> renderXSH2 xs
+getXSH2 :: Double -> ModelFiles -> IO Builder
+getXSH2 sqrtS modelFiles = do
+    let param = getParam modelFiles
+
+    slha <- getSLHASpec (getOutputFile modelFiles)
+    let xs = case slha of
+                 Left  _      -> nullXSH2
+                 Right blocks -> let xsGG = numValueOf "SUSHIggh" 1 blocks
+                                     xsBB = numValueOf "SUSHIbbh" 1 blocks
+                                 in XSH2 { _xs    = xsGG + xsBB
+                                         , _xsGG  = xsGG
+                                         , _xsBB  = xsBB
+                                         , _sqrtS = sqrtS }
+    return $ renderInputParam param <> space <> renderXSH2 xs
+  where
+    nullXSH2 = XSH2 { _xs = 0, _xsGG = 0, _xsBB = 0, _sqrtS = sqrtS }
 
 space :: Builder
 space = fromText " "

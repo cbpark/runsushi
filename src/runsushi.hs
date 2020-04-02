@@ -7,7 +7,6 @@
 
 module Main where
 
-import           HEP.Data.SLHA
 import           HEP.Data.THDM
 import           HEP.Data.Util    (mkPoints)
 
@@ -57,25 +56,14 @@ main = do
                                             }) mHVals mSVals
 
     let inpTmpF = fromMaybe "input_template.in" (input inp)
-
     workDir <- (</> "runsushi") <$> getTemporaryDirectory
     createDirectoryIfMissing True workDir
+    modelFiles <- V.mapM (mkModelFiles sqrtS workDir inpTmpF) params
 
-    (inpF, hashVal) <- V.head <$> V.mapM (mkInputFile sqrtS workDir inpTmpF) params
-    let outF = workDir </> "output-" ++ show hashVal ++ ".dat"
+    mapM_ (flip (readProcess sushiexe) []) (V.map getFiles modelFiles)
+    getXSH2 sqrtS (V.head modelFiles) >>= print
 
-    outputStr <- readProcess sushiexe [inpF, outF] []
-    putStrLn outputStr
-
-    slha <- getSLHASpec outF
-    case slha of
-        Left err     -> removeDirectoryRecursive workDir >> die err
-        Right blocks -> do let xsGGH = numValueOf "SUSHIggh" 1 blocks
-                               xsBBH = numValueOf "SUSHIbbh" 1 blocks
-                               xs = xsH2 xsGGH xsBBH sqrtS
-                           print (renderXSH2 xs)
-
-    removeDirectoryRecursive workDir
+    -- removeDirectoryRecursive workDir
     putStrLn "-- done."
 
 isValidExecutable :: FilePath -> IO Bool

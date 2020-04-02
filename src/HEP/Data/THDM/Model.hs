@@ -14,13 +14,26 @@ module HEP.Data.THDM.Model
     , sin2Beta
     , cosBetaAlpha
     , sinBetaAlpha
+
+    , ModelFiles
+    , getFiles
+    , getParam
+    , getInputFile
+    , getOutputFile
+
+    , mkModelFiles
     ) where
 
-import Data.Double.Conversion.Text (toFixed)
-import Data.Hashable               (Hashable)
-import Data.Text.Lazy.Builder      (Builder, fromText, singleton)
+import           Data.Double.Conversion.Text (toExponential, toFixed)
+import           Data.Hashable               (Hashable, hash)
+import           Data.Text                   (Text, replace)
+import qualified Data.Text                   as T
+import qualified Data.Text.IO                as TIO
+import           Data.Text.Lazy.Builder      (Builder, fromText, singleton)
+import           System.FilePath             ((</>))
 
-import GHC.Generics                (Generic)
+import           GHC.Generics                (Generic)
+import           System.IO                   (IOMode (..), withFile)
 
 data THDMType = TypeI | TypeII | UnknownType deriving (Eq, Generic)
 
@@ -94,3 +107,59 @@ renderAngles angs =
 
 space :: Builder
 space = fromText " "
+
+data ModelFiles = ModelFiles { _files :: [FilePath], _param :: InputParam }
+
+getFiles :: ModelFiles -> [FilePath]
+getFiles = _files
+
+getParam :: ModelFiles -> InputParam
+getParam = _param
+
+getFile :: ([FilePath] -> FilePath) -> ModelFiles -> FilePath
+getFile f (ModelFiles files _) = f files
+
+getInputFile, getOutputFile :: ModelFiles -> FilePath
+getInputFile  = getFile head
+getOutputFile = getFile (head . tail)
+
+mkModelFiles :: Double      -- ^ sqrt(s)
+             -> FilePath    -- ^ work directory
+             -> FilePath    -- ^ input template file
+             -> InputParam  -- ^ input parameters
+             -> IO ModelFiles
+mkModelFiles sqrtS workDir inpTmpF param = do
+    let hashVal = show (hash param)
+        inpF = workDir </> "input-" ++ hashVal ++ ".dat"
+
+    inpStr <- mkInputFile' sqrtS inpTmpF param
+    withFile inpF WriteMode $ \h -> TIO.hPutStrLn h inpStr
+
+    let outF = workDir </> "output-" ++ hashVal ++ ".dat"
+    return $ ModelFiles { _files = [inpF, outF], _param = param }
+
+mkInputFile' :: Double -> FilePath -> InputParam -> IO Text
+mkInputFile' sqrtS inpTmpF InputParam {..} = do
+    template <- T.lines <$> TIO.readFile inpTmpF
+    let inpTxt =   replaceECM
+                 . replaceTanb
+                 . replaceMH
+                 . replaceMA
+                 . replaceMCH
+                 . replaceM12
+                 . replaceTYPE
+                 . replaceSinBA
+                 <$> template
+    return $ T.unlines inpTxt
+  where
+    replaceECM   = replace "$ECM"      (toFixed 1 sqrtS)
+    replaceTanb  = replace "$TANBETA"  (toFixed 1 (tanBeta _angs))
+    replaceMH    = replace "$MH"       (toExponential 7 _mH)
+    replaceMA    = replace "$MA"       (toExponential 7 _mA)
+    replaceMCH   = replace "$MCH"      (toExponential 7 _mHp)
+    replaceM12   = let sin2b = sin2Beta _angs
+                       m12 = sqrt $ 0.5 * _mS * _mS * sin2b
+                   in replace "$M12"   (toExponential 7 m12)
+    replaceTYPE  = replace "$TYPE"     ((T.pack . show) _mdtyp)
+    replaceSinBA = let sinba = sinBetaAlpha _angs
+                   in replace "$SINBA" (toExponential 7 sinba)
