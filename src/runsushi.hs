@@ -8,21 +8,20 @@
 module Main where
 
 import           HEP.Data.THDM
-import           HEP.Data.Util          (mkPoints)
+import           HEP.Data.Util     (mkPoints)
 
-import           Data.Text.Lazy         (Text, pack)
-import           Data.Text.Lazy.Builder (toLazyText)
-import           Data.Text.Lazy.IO      (hPutStrLn)
-import qualified Data.Vector            as V
-import           Options.Generic        hiding (Text)
+import           Data.Text.Lazy    (Text, pack)
+import           Data.Text.Lazy.IO (hPutStrLn)
+import qualified Data.Vector       as V
+import           Options.Generic   hiding (Text)
 import           System.Directory
-import           System.FilePath        ((</>))
-import           System.Process         (readProcess)
+import           System.FilePath   ((</>))
+import           System.Process    (readProcess)
 
-import           Control.Monad          (unless, when)
-import           Data.Maybe             (fromMaybe)
-import           System.Exit            (die)
-import           System.IO              (IOMode (..), withFile)
+import           Control.Monad     (unless, when)
+import           Data.Maybe        (fromMaybe)
+import           System.Exit       (die)
+import           System.IO         (IOMode (..), withFile)
 
 main :: IO ()
 main = do
@@ -69,8 +68,7 @@ main = do
     let outfile = fromMaybe "output_h2_xs.dat" (output inp)
     withFile outfile WriteMode $ \h -> do
         hPutStrLn h header
-        (fmap . fmap) toLazyText (V.mapM (getXSH2 sqrtS) modelFiles)
-            >>= V.mapM_ (hPutStrLn h)
+        V.mapM (getXSH2 sqrtS) modelFiles >>= V.mapM_ (hPutStrLn h)
 
     removeDirectoryRecursive workDir
     putStrLn $ "-- " ++ outfile ++ " generated."
