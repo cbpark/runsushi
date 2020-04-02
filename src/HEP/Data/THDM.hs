@@ -7,20 +7,28 @@ import           HEP.Data.THDM.CrossSection  as TC
 import           HEP.Data.THDM.Model         as TM
 
 import           Data.Double.Conversion.Text (toExponential, toFixed)
+import           Data.Hashable               (hash)
 import           Data.Text                   (Text, replace)
 import qualified Data.Text                   as T
 import qualified Data.Text.IO                as TIO
--- import           System.Directory
--- import           System.FilePath             ((</>))
+import           System.FilePath             ((</>))
 
--- mkInputFile' :: Double -> FilePath -> InputParam -> IO FilePath
--- mkInputFile' sqrtS inpTmpF InputParam {..} = do
---     tmpdir <- getTemporaryDirectory
---     let inpF = tmpdir </> "input.dat"
---     return inpF
+import           System.IO                   (IOMode (..), withFile)
 
-mkInputFile :: Double -> FilePath -> InputParam -> IO Text
-mkInputFile sqrtS inpTmpF InputParam {..} = do
+mkInputFile :: Double -> FilePath -> FilePath -> InputParam -> IO (FilePath, Int)
+mkInputFile sqrtS workDir inpTmpF inp = do
+    let inpHash = hash inp
+        inpF = workDir </> ("input-" ++ show inpHash ++ ".dat")
+
+    putStrLn $ "-- The input file is: " ++ inpF
+
+    inpStr <- mkInputFile' sqrtS inpTmpF inp
+    withFile inpF WriteMode $ \h -> TIO.hPutStrLn h inpStr
+
+    return (inpF, inpHash)
+
+mkInputFile' :: Double -> FilePath -> InputParam -> IO Text
+mkInputFile' sqrtS inpTmpF InputParam {..} = do
     template <- T.lines <$> TIO.readFile inpTmpF
     let inpTxt =   replaceECM
                  . replaceTanb

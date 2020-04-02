@@ -9,20 +9,17 @@ module Main where
 
 import           HEP.Data.SLHA
 import           HEP.Data.THDM
-import           HEP.Data.Util               (mkPoints)
+import           HEP.Data.Util    (mkPoints)
 
--- import           Data.Double.Conversion.Text
--- import qualified Data.Text                   as T
-import qualified Data.Text.IO                as TIO
-import qualified Data.Vector                 as V
+import qualified Data.Vector      as V
 import           Options.Generic
 import           System.Directory
-import           System.Process              (readProcess)
+import           System.FilePath  ((</>))
+import           System.Process   (readProcess)
 
-import           Control.Monad               (unless, when)
-import           Data.Maybe                  (fromMaybe)
-import           System.Exit                 (die)
-import           System.IO                   (IOMode (..), withFile)
+import           Control.Monad    (unless, when)
+import           Data.Maybe       (fromMaybe)
+import           System.Exit      (die)
 
 main :: IO ()
 main = do
@@ -60,31 +57,26 @@ main = do
                                             }) mHVals mSVals
 
     let inpTmpF = fromMaybe "input_template.in" (input inp)
-    inpStrs <- V.mapM (mkInputFile sqrtS inpTmpF) params
 
+    workDir <- (</> "runsushi") <$> getTemporaryDirectory
+    createDirectoryIfMissing True workDir
 
-    -- tmpdir <- getTemporaryDirectory
-    -- let inpF = tmpdir </> "input.dat"
-    --     outF = tmpdir </> "output.dat"
-    let inpF = "input.dat"
-        outF = "output.dat"
-
-    withFile inpF WriteMode $ \h -> TIO.hPutStrLn h (V.head inpStrs)
+    (inpF, hashVal) <- V.head <$> V.mapM (mkInputFile sqrtS workDir inpTmpF) params
+    let outF = workDir </> "output-" ++ show hashVal ++ ".dat"
 
     outputStr <- readProcess sushiexe [inpF, outF] []
     putStrLn outputStr
 
     slha <- getSLHASpec outF
     case slha of
-        Left err     -> die err
+        Left err     -> removeDirectoryRecursive workDir >> die err
         Right blocks -> do let xsGGH = numValueOf "SUSHIggh" 1 blocks
                                xsBBH = numValueOf "SUSHIbbh" 1 blocks
                                xs = xsH2 xsGGH xsBBH sqrtS
                            print (renderXSH2 xs)
 
-    -- putStrLn $ "-- The temporary files will be removed: "
-    --     ++ inpF ++ ", " ++ outF
-    -- mapM_ removeFile [inpF, outF]
+    removeDirectoryRecursive workDir
+    putStrLn "-- done."
 
 isValidExecutable :: FilePath -> IO Bool
 isValidExecutable exe = do

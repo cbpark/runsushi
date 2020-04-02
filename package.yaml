@@ -17,6 +17,7 @@ dependencies:
   - directory
   - double-conversion
   - filepath
+  - hashable
   - optparse-generic
   - process
   - text

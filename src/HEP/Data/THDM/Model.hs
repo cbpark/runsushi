@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
@@ -16,9 +17,14 @@ module HEP.Data.THDM.Model
     ) where
 
 import Data.Double.Conversion.Text (toFixed)
+import Data.Hashable               (Hashable)
 import Data.Text.Lazy.Builder      (Builder, fromText, singleton)
 
-data THDMType = TypeI | TypeII | UnknownType deriving Eq
+import GHC.Generics                (Generic)
+
+data THDMType = TypeI | TypeII | UnknownType deriving (Eq, Generic)
+
+instance Hashable THDMType
 
 instance Show THDMType where
     show mdtyp | mdtyp == TypeI  = "1"
@@ -31,7 +37,9 @@ data InputParam = InputParam { _mdtyp :: THDMType
                              , _mA    :: Double
                              , _mHp   :: Double
                              , _angs  :: Angles
-                             } deriving Show
+                             } deriving (Generic, Show)
+
+instance Hashable InputParam
 
 renderInputParam :: InputParam -> Builder
 renderInputParam InputParam {..} =
@@ -51,7 +59,9 @@ renderTHDMType typ = let typ' | typ == TypeI  = '1'
 renderMass :: Double -> Builder
 renderMass = fromText . toFixed 2
 
-newtype Angles = Angles (Double, Double) deriving Show
+newtype Angles = Angles (Double, Double) deriving (Show, Generic)
+
+instance Hashable Angles
 
 mkAngles :: Double -> Double -> Angles
 mkAngles tanb cosba = Angles (tanb, cosba)
