@@ -70,7 +70,7 @@ main = do
         hPutStrLn h header
         traverse (getXSH2 sqrtS) modelFiles >>= V.mapM_ (hPutStrLn h)
 
-    removeDirectoryRecursive workDir
+    -- removeDirectoryRecursive workDir
     putStrLn $ "-- " ++ outfile ++ " generated."
 
 isValidExecutable :: FilePath -> IO Bool
@@ -104,4 +104,4 @@ header = pack $ "# " <>
          foldl1 (\v1 v2 -> v1 <> ", " <> v2)
          (zipWith (\n v -> "(" <> show n <> ") " <> v) ([1..] :: [Int])
           [ "type", "mS", "mH", "mA", "mHp", "tanb", "cosba"
-          , "sqrt(s)", "sigma(pp)", "sigma(gg)", "sigma(bb)" ])
+          , "sqrt(s)", "sigma(pp) (fb)", "sigma(gg)", "sigma(bb)" ])

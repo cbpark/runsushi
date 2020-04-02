@@ -31,8 +31,8 @@ getXSH2 sqrtS modelFiles = do
     slha <- getSLHASpec (getOutputFile modelFiles)
     let xs = case slha of
                  Left  _      -> nullXSH2
-                 Right blocks -> let xsGG = numValueOf "SUSHIggh" 1 blocks
-                                     xsBB = numValueOf "SUSHIbbh" 1 blocks
+                 Right blocks -> let xsGG = 1000 * numValueOf "SUSHIggh" 1 blocks
+                                     xsBB = 1000 * numValueOf "SUSHIbbh" 1 blocks
                                  in XSH2 { _xs    = xsGG + xsBB
                                          , _xsGG  = xsGG
                                          , _xsBB  = xsBB
