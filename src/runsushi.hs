@@ -61,14 +61,14 @@ main = do
     let inpTmpF = fromMaybe "input_template.in" (input inp)
     workDir <- (</> "runsushi") <$> getTemporaryDirectory
     createDirectoryIfMissing True workDir
-    modelFiles <- V.mapM (mkModelFiles sqrtS workDir inpTmpF) params
+    modelFiles <- traverse (mkModelFiles sqrtS workDir inpTmpF) params
 
-    V.mapM_ (flip (readProcess sushiexe) []) (V.map getFiles modelFiles)
+    V.mapM_ (flip (readProcess sushiexe) []) (getFiles <$> modelFiles)
 
     let outfile = fromMaybe "output_h2_xs.dat" (output inp)
     withFile outfile WriteMode $ \h -> do
         hPutStrLn h header
-        V.mapM (getXSH2 sqrtS) modelFiles >>= V.mapM_ (hPutStrLn h)
+        traverse (getXSH2 sqrtS) modelFiles >>= V.mapM_ (hPutStrLn h)
 
     removeDirectoryRecursive workDir
     putStrLn $ "-- " ++ outfile ++ " generated."
@@ -104,4 +104,4 @@ header = pack $ "# " <>
          foldl1 (\v1 v2 -> v1 <> ", " <> v2)
          (zipWith (\n v -> "(" <> show n <> ") " <> v) ([1..] :: [Int])
           [ "type", "mS", "mH", "mA", "mHp", "tanb", "cosba"
-          , "sqrt(s)", "sigma_tot", "sigma_gg", "sigma_bb" ])
+          , "sqrt(s)", "sigma(pp)", "sigma(gg)", "sigma(bb)" ])
