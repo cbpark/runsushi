@@ -138,7 +138,8 @@ mkModelFiles :: MonadIO m
              -> FilePath  -- ^ input template file
              -> Pipe InputParam ModelFiles m ()
 mkModelFiles sqrtS workDir inpTmpF = forever $ do
-    param <- await
+    param@InputParam {..} <- await
+    liftIO . putStrLn $ "---- m_H = " ++ show _mH ++ ", m_A = " ++ show _mA
     liftIO (mkModelFiles' sqrtS workDir inpTmpF param) >>= yield
 
 mkModelFiles' :: MonadIO m
