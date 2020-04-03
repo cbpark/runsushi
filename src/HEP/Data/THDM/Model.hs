@@ -52,6 +52,7 @@ fromIntToType :: Int -> THDMType
 fromIntToType n | n == 1    = TypeI
                 | n == 2    = TypeII
                 | otherwise = UnknownType
+{-# INLINE fromIntToType #-}
 
 data InputParam = InputParam { _mdtyp :: !THDMType
                              , _mS    :: !Double
@@ -77,6 +78,7 @@ renderTHDMType typ = let typ' | typ == TypeI  = '1'
                               | typ == TypeII = '2'
                               | otherwise     = '0'
                      in singleton typ'
+{-# INLINE renderTHDMType #-}
 
 renderMass :: Double -> Builder
 renderMass = fromText . toFixed 2
@@ -87,20 +89,25 @@ instance Hashable Angles
 
 mkAngles :: Double -> Double -> Angles
 mkAngles tanb cosba = Angles (tanb, cosba)
+{-# INLINE mkAngles #-}
 
 tanBeta :: Angles -> Double
 tanBeta (Angles (tanb, _)) = tanb
+{-# INLINE tanBeta #-}
 
 sin2Beta :: Angles -> Double
 sin2Beta (Angles (tanb, _)) = 2 * tanb / (1 + tanb * tanb)
+{-# INLINE sin2Beta #-}
 
 cosBetaAlpha :: Angles -> Double
 cosBetaAlpha (Angles (_, cosba)) = cosba
+{-# INLINE cosBetaAlpha #-}
 
 sinBetaAlpha :: Angles -> Double
 sinBetaAlpha (Angles (tanb, cosba)) = let b = atan tanb
                                           a = piHalf (b - acos cosba)
                                       in sin (b - a)
+{-# INLINE sinBetaAlpha #-}
 
 piHalf :: Double -> Double
 piHalf th | th >=  pi12 = piHalf $! th - pi
