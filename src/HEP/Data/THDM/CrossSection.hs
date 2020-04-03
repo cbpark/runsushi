@@ -16,24 +16,24 @@ import           System.Process              (readProcessWithExitCode)
 import           Control.Monad               (forever)
 import           System.IO                   (Handle)
 
-runSushi :: FilePath -> Pipe ModelFiles ModelFiles IO ()
+runSushi :: MonadIO m => FilePath -> Pipe ModelFiles ModelFiles m ()
 runSushi sushiexe = forever $ do
     modelFiles <- await
     let files = getFiles modelFiles
-    lift (readProcessWithExitCode sushiexe files "") >> yield modelFiles
+    liftIO (readProcessWithExitCode sushiexe files "") >> yield modelFiles
 
-data XSH2 = XSH2 { _xs    :: Double
-                 , _xsGG  :: Double
-                 , _xsBB  :: Double
-                 , _sqrtS :: Double
+data XSH2 = XSH2 { _xs    :: !Double
+                 , _xsGG  :: !Double
+                 , _xsBB  :: !Double
+                 , _sqrtS :: !Double
                  }
 
-getXSH2 :: Double -> Pipe ModelFiles Builder IO ()
+getXSH2 :: MonadIO m => Double -> Pipe ModelFiles Builder m ()
 getXSH2 sqrtS = forever $ do
     modelFiles <- await
     lift (getXSH2' sqrtS modelFiles) >>= yield
 
-getXSH2' :: Double -> ModelFiles -> IO Builder
+getXSH2' :: MonadIO m => Double -> ModelFiles -> m Builder
 getXSH2' sqrtS modelFiles = do
     let param = getParam modelFiles
 
@@ -61,5 +61,5 @@ renderXSH2 XSH2 {..} =
 space :: Builder
 space = fromText " "
 
-printXS :: Handle -> Consumer Builder IO ()
+printXS :: MonadIO m => Handle -> Consumer Builder m ()
 printXS h = for (P.map toLazyText) (liftIO . hPutStrLn h)

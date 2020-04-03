@@ -8,7 +8,7 @@ github:             cbpark/runsushi
 category:           Physics
 extra-source-files: input_template.in
 
-ghc-options: -Wall -Wcompat -O2
+ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
 
 dependencies:
   - base >= 4.12.0.0 && < 5

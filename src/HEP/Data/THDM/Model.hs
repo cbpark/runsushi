@@ -53,12 +53,12 @@ fromIntToType n | n == 1    = TypeI
                 | n == 2    = TypeII
                 | otherwise = UnknownType
 
-data InputParam = InputParam { _mdtyp :: THDMType
-                             , _mS    :: Double
-                             , _mH    :: Double
-                             , _mA    :: Double
-                             , _mHp   :: Double
-                             , _angs  :: Angles
+data InputParam = InputParam { _mdtyp :: !THDMType
+                             , _mS    :: !Double
+                             , _mH    :: !Double
+                             , _mA    :: !Double
+                             , _mHp   :: !Double
+                             , _angs  :: !Angles
                              } deriving (Generic, Show)
 
 instance Hashable InputParam
@@ -132,29 +132,34 @@ getInputFile, getOutputFile :: ModelFiles -> FilePath
 getInputFile  = getFile head
 getOutputFile = getFile (head . tail)
 
-mkModelFiles :: Double -> FilePath -> FilePath -> Pipe InputParam ModelFiles IO ()
+mkModelFiles :: MonadIO m
+             => Double    -- ^ sqrt(s)
+             -> FilePath  -- ^ (temporary) work directory
+             -> FilePath  -- ^ input template file
+             -> Pipe InputParam ModelFiles m ()
 mkModelFiles sqrtS workDir inpTmpF = forever $ do
     param <- await
-    lift (mkModelFiles' sqrtS workDir inpTmpF param) >>= yield
+    liftIO (mkModelFiles' sqrtS workDir inpTmpF param) >>= yield
 
-mkModelFiles' :: Double      -- ^ sqrt(s)
-              -> FilePath    -- ^ work directory
+mkModelFiles' :: MonadIO m
+              => Double      -- ^ sqrt(s)
+              -> FilePath    -- ^ (temporary) work directory
               -> FilePath    -- ^ input template file
               -> InputParam  -- ^ input parameters
-              -> IO ModelFiles
+              -> m ModelFiles
 mkModelFiles' sqrtS workDir inpTmpF param = do
     let hashVal = show (hash param)
         inpF = workDir </> "input-" ++ hashVal ++ ".dat"
 
     inpStr <- mkInputFile' sqrtS inpTmpF param
-    withFile inpF WriteMode $ \h -> TIO.hPutStrLn h inpStr
+    liftIO . withFile inpF WriteMode $ \h -> TIO.hPutStrLn h inpStr
 
     let outF = workDir </> "output-" ++ hashVal ++ ".dat"
     return $ ModelFiles { _files = [inpF, outF], _param = param }
 
-mkInputFile' :: Double -> FilePath -> InputParam -> IO Text
+mkInputFile' :: MonadIO m => Double -> FilePath -> InputParam -> m Text
 mkInputFile' sqrtS inpTmpF InputParam {..} = do
-    template <- T.lines <$> TIO.readFile inpTmpF
+    template <- T.lines <$> (liftIO . TIO.readFile) inpTmpF
     let inpTxt =   replaceECM
                  . replaceTanb
                  . replaceMH

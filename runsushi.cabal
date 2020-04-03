@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d29e9493ab7e957fd625b326eca6a28003598a159c29d2e55031c289394aed95
+-- hash: 33ae2d361781a22576645f044a4546e0328ef64c222fa370a82169b5a5e87961
 
 name:           runsushi
 version:        0.0.0.0
@@ -35,7 +35,7 @@ executable runsushi
       Paths_runsushi
   hs-source-dirs:
       src
-  ghc-options: -Wall -Wcompat -O2 -threaded
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -threaded
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5

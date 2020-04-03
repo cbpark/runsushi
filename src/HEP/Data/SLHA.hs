@@ -10,19 +10,20 @@ module HEP.Data.SLHA
     ) where
 
 import           Data.Attoparsec.Text
-import           Data.IntMap          (IntMap)
-import qualified Data.IntMap          as IntMap
-import           Data.Map             (Map)
-import qualified Data.Map             as Map
-import           Data.Text            (Text)
-import qualified Data.Text            as T
-import           Data.Text.IO         (hGetContents)
-import qualified Data.Text.Read       as TR
+import           Data.IntMap            (IntMap)
+import qualified Data.IntMap            as IntMap
+import           Data.Map               (Map)
+import qualified Data.Map               as Map
+import           Data.Text              (Text)
+import qualified Data.Text              as T
+import           Data.Text.IO           (hGetContents)
+import qualified Data.Text.Read         as TR
 
-import           Control.Monad        (void)
-import           Data.Maybe           (fromMaybe)
-import           Prelude              hiding (takeWhile)
-import           System.IO            (IOMode (..), withFile)
+import           Control.Monad          (void)
+import           Control.Monad.IO.Class (MonadIO (..))
+import           Data.Maybe             (fromMaybe)
+import           Prelude                hiding (takeWhile)
+import           System.IO              (IOMode (..), withFile)
 
 newtype SLHASpectrum = SLHASpectrum (Map Text SLHAEntries) deriving Show
 
@@ -66,9 +67,9 @@ slhaBlock = do
 slhaSpec :: Parser SLHASpectrum
 slhaSpec = SLHASpectrum . Map.fromList <$> many' slhaBlock
 
-getSLHASpec :: FilePath -> IO (Either String SLHASpectrum)
+getSLHASpec :: MonadIO m => FilePath -> m (Either String SLHASpectrum)
 getSLHASpec fin =
-    withFile fin ReadMode $ \h -> do
+    liftIO . withFile fin ReadMode $ \h -> do
         contents <- hGetContents h
         return (parseOnly slhaSpec contents)
 
