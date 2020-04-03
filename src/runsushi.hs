@@ -63,23 +63,19 @@ main = do
     let outfile = fromMaybe "output_h2_xs.dat" (output inp)
     withFile outfile WriteMode $ \h -> do
         hPutStrLn h header
-        -- modelFiles <- traverse (mkModelFiles sqrtS workDir inpTmpF) params
-        -- V.mapM_ (flip (readProcessWithExitCode sushiexe) "") (getFiles <$> modelFiles)
-        -- traverse (getXSH2 sqrtS) modelFiles >>= V.mapM_ (hPutStrLn h)
         runEffect $ each params
                     >-> mkModelFiles sqrtS workDir inpTmpF
                     >-> runSushi sushiexe
                     >-> getXSH2 sqrtS
                     >-> printXS h
 
-    -- removeDirectoryRecursive workDir
+    removeDirectoryRecursive workDir
     putStrLn $ "-- " ++ outfile ++ " generated."
-
-isValidExecutable :: FilePath -> IO Bool
-isValidExecutable exe = do
-    exists <- doesFileExist exe
-    isExec <- executable <$> getPermissions exe
-    return $ exists && isExec
+  where
+    isValidExecutable exe = do
+        exists <- doesFileExist exe
+        isExec <- executable <$> getPermissions exe
+        return $ exists && isExec
 
 data InputArgs w = InputArgs
     { sushi    :: w ::: FilePath       <?> "SuSHi executable (which sushi)"
