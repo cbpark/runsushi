@@ -8,15 +8,14 @@
 module Main where
 
 import           HEP.Data.THDM
-import           HEP.Data.Util     (mkPoints)
+import           HEP.Data.Util     (mkPoints, mkWorkDir)
 
 import           Data.Text.Lazy    (Text, pack)
 import           Data.Text.Lazy.IO (hPutStrLn)
 import qualified Data.Vector       as V
 import           Options.Generic   hiding (Text)
 import           System.Directory
-import           System.FilePath   ((</>))
-import           System.Process    (readProcess)
+import           System.Process    (readProcessWithExitCode)
 
 import           Control.Monad     (unless, when)
 import           Data.Maybe        (fromMaybe)
@@ -59,18 +58,17 @@ main = do
                                             }) mHVals mSVals
 
     let inpTmpF = fromMaybe "input_template.in" (input inp)
-    workDir <- (</> "runsushi") <$> getTemporaryDirectory
-    createDirectoryIfMissing True workDir
+    workDir <- mkWorkDir
     modelFiles <- traverse (mkModelFiles sqrtS workDir inpTmpF) params
 
-    V.mapM_ (flip (readProcess sushiexe) []) (getFiles <$> modelFiles)
+    V.mapM_ (flip (readProcessWithExitCode sushiexe) "") (getFiles <$> modelFiles)
 
     let outfile = fromMaybe "output_h2_xs.dat" (output inp)
     withFile outfile WriteMode $ \h -> do
         hPutStrLn h header
         traverse (getXSH2 sqrtS) modelFiles >>= V.mapM_ (hPutStrLn h)
 
-    -- removeDirectoryRecursive workDir
+    removeDirectoryRecursive workDir
     putStrLn $ "-- " ++ outfile ++ " generated."
 
 isValidExecutable :: FilePath -> IO Bool

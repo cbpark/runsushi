@@ -28,3 +28,4 @@ executables:
   runsushi:
     main: runsushi.hs
     source-dirs: src
+    ghc-options: -threaded

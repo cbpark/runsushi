@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 28cdc1bf4e86e40143f9031ee493849b48c82cd8b13ffcc5b866614f98c39bd2
+-- hash: e0510ea0ff1ad413f22ad8d2b35b1bc24a4272710dba8662611b560122bb5335
 
 name:           runsushi
 version:        0.0.0.0
@@ -35,7 +35,7 @@ executable runsushi
       Paths_runsushi
   hs-source-dirs:
       src
-  ghc-options: -Wall -Wcompat
+  ghc-options: -Wall -Wcompat -threaded
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
