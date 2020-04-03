@@ -14,8 +14,8 @@ import           Data.Text.Lazy    (Text, pack)
 import           Data.Text.Lazy.IO (hPutStrLn)
 import qualified Data.Vector       as V
 import           Options.Generic   hiding (Text)
+import           Pipes
 import           System.Directory
-import           System.Process    (readProcessWithExitCode)
 
 import           Control.Monad     (unless, when)
 import           Data.Maybe        (fromMaybe)
@@ -59,16 +59,20 @@ main = do
 
     let inpTmpF = fromMaybe "input_template.in" (input inp)
     workDir <- mkWorkDir
-    modelFiles <- traverse (mkModelFiles sqrtS workDir inpTmpF) params
-
-    V.mapM_ (flip (readProcessWithExitCode sushiexe) "") (getFiles <$> modelFiles)
 
     let outfile = fromMaybe "output_h2_xs.dat" (output inp)
     withFile outfile WriteMode $ \h -> do
         hPutStrLn h header
-        traverse (getXSH2 sqrtS) modelFiles >>= V.mapM_ (hPutStrLn h)
+        -- modelFiles <- traverse (mkModelFiles sqrtS workDir inpTmpF) params
+        -- V.mapM_ (flip (readProcessWithExitCode sushiexe) "") (getFiles <$> modelFiles)
+        -- traverse (getXSH2 sqrtS) modelFiles >>= V.mapM_ (hPutStrLn h)
+        runEffect $ each params
+                    >-> mkModelFiles sqrtS workDir inpTmpF
+                    >-> runSushi sushiexe
+                    >-> getXSH2 sqrtS
+                    >-> printXS h
 
-    removeDirectoryRecursive workDir
+    -- removeDirectoryRecursive workDir
     putStrLn $ "-- " ++ outfile ++ " generated."
 
 isValidExecutable :: FilePath -> IO Bool

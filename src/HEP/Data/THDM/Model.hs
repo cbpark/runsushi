@@ -30,8 +30,10 @@ import           Data.Text                   (Text, replace)
 import qualified Data.Text                   as T
 import qualified Data.Text.IO                as TIO
 import           Data.Text.Lazy.Builder      (Builder, fromText, singleton)
+import           Pipes
 import           System.FilePath             ((</>))
 
+import           Control.Monad               (forever)
 import           GHC.Generics                (Generic)
 import           System.IO                   (IOMode (..), withFile)
 
@@ -123,12 +125,17 @@ getInputFile, getOutputFile :: ModelFiles -> FilePath
 getInputFile  = getFile head
 getOutputFile = getFile (head . tail)
 
-mkModelFiles :: Double      -- ^ sqrt(s)
-             -> FilePath    -- ^ work directory
-             -> FilePath    -- ^ input template file
-             -> InputParam  -- ^ input parameters
-             -> IO ModelFiles
-mkModelFiles sqrtS workDir inpTmpF param = do
+mkModelFiles :: Double -> FilePath -> FilePath -> Pipe InputParam ModelFiles IO ()
+mkModelFiles sqrtS workDir inpTmpF = forever $ do
+    param <- await
+    lift (mkModelFiles' sqrtS workDir inpTmpF param) >>= yield
+
+mkModelFiles' :: Double      -- ^ sqrt(s)
+              -> FilePath    -- ^ work directory
+              -> FilePath    -- ^ input template file
+              -> InputParam  -- ^ input parameters
+              -> IO ModelFiles
+mkModelFiles' sqrtS workDir inpTmpF param = do
     let hashVal = show (hash param)
         inpF = workDir </> "input-" ++ hashVal ++ ".dat"
 
