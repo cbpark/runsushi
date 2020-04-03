@@ -31,10 +31,7 @@ main = do
     validExe <- isValidExecutable sushiexe
     unless validExe $ die ("-- Invalid SuSHi executable: " ++ sushiexe)
 
-    let mdtyp = fromMaybe 2 (mtype inp)
-        mdtypVal | mdtyp == 1 = TypeI
-                 | mdtyp == 2 = TypeII
-                 | otherwise  = UnknownType
+    let mdtypVal = fromIntToType $ fromMaybe 2 (mtype inp)
     when (mdtypVal == UnknownType) $ die "The type must be either 1 or 2."
 
     let sqrtS = fromMaybe 13000 (eCM inp)

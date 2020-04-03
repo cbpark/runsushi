@@ -8,6 +8,8 @@ module HEP.Data.THDM.Model
     , renderInputParam
 
     , THDMType (..)
+    , fromIntToType
+
     , Angles
     , mkAngles
     , tanBeta
@@ -45,6 +47,11 @@ instance Show THDMType where
     show mdtyp | mdtyp == TypeI  = "1"
                | mdtyp == TypeII = "2"
                | otherwise       = "0"
+
+fromIntToType :: Int -> THDMType
+fromIntToType n | n == 1    = TypeI
+                | n == 2    = TypeII
+                | otherwise = UnknownType
 
 data InputParam = InputParam { _mdtyp :: THDMType
                              , _mS    :: Double
