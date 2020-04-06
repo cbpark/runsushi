@@ -7,20 +7,20 @@
 
 module Main where
 
-import           HEP.Data.THDM
-import           HEP.Data.Util     (mkPoints, mkWorkDir)
+import           HEP.Data.SUSHI.THDM
+import           HEP.Data.Util       (mkPoints, mkWorkDir)
 
-import           Data.Text.Lazy    (Text, pack)
-import           Data.Text.Lazy.IO (hPutStrLn)
-import qualified Data.Vector       as V
-import           Options.Generic   hiding (Text)
+import           Data.Text.Lazy      (Text, pack)
+import           Data.Text.Lazy.IO   (hPutStrLn)
+import qualified Data.Vector         as V
+import           Options.Generic     hiding (Text)
 import           Pipes
 import           System.Directory
 
-import           Control.Monad     (unless, when)
-import           Data.Maybe        (fromMaybe)
-import           System.Exit       (die)
-import           System.IO         (IOMode (..), withFile)
+import           Control.Monad       (unless, when)
+import           Data.Maybe          (fromMaybe)
+import           System.Exit         (die)
+import           System.IO           (IOMode (..), withFile)
 
 main :: IO ()
 main = do

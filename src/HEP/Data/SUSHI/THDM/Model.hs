@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module HEP.Data.THDM.Model
+module HEP.Data.SUSHI.THDM.Model
     (
       InputParam (..)
     , renderInputParam

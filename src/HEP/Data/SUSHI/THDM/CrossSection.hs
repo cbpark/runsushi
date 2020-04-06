@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module HEP.Data.THDM.CrossSection (runSushi, getXSH2, printXS) where
+module HEP.Data.SUSHI.THDM.CrossSection (runSushi, getXSH2, printXS) where
 
 import           HEP.Data.SLHA               (getSLHASpec, numValueOf)
-import           HEP.Data.THDM.Model
+import           HEP.Data.SUSHI.THDM.Model
 
 import           Data.Double.Conversion.Text (toExponential, toFixed)
 import           Data.Text.Lazy.Builder      (Builder, fromText, toLazyText)
