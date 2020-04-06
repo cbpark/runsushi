@@ -3,6 +3,7 @@ module HEP.Data.Util where
 import Data.Vector      (Vector, generate)
 import System.Directory (createDirectoryIfMissing, getTemporaryDirectory)
 import System.FilePath  ((</>))
+import System.Random    (randomIO)
 
 mkPoints :: Double -> [Double] -> (Vector Double, Int)
 mkPoints stepsize vs =
@@ -12,7 +13,9 @@ mkPoints stepsize vs =
 {-# INLINE mkPoints #-}
 
 mkWorkDir :: IO FilePath
-mkWorkDir = do workDir <- (</> "runsushi") <$> getTemporaryDirectory
+mkWorkDir = do r <- randomIO
+               tmpDir <- getTemporaryDirectory
+               let workDir = tmpDir </> ("runsushi" ++ take 8 (show (r :: Int)))
                createDirectoryIfMissing True workDir
                return workDir
 {-# INLINE mkWorkDir #-}

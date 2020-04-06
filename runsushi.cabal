@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b135b5a6ade5ba7dbfa63ff1c8dc03d87119fc767d30e439765f4e0cddf92744
+-- hash: 401ee0146d4239e3e3bb4586699dd5ca0ff5be6e7d763cb24742884c7ac19701
 
 name:           runsushi
 version:        0.0.0.0
@@ -47,6 +47,7 @@ executable runsushi
     , optparse-generic
     , pipes
     , process
+    , random
     , text
     , vector
   default-language: Haskell2010

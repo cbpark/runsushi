@@ -21,6 +21,7 @@ dependencies:
   - optparse-generic
   - pipes
   - process
+  - random
   - text
   - vector
 
