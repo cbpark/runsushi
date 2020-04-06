@@ -56,6 +56,7 @@ main = do
 
     let inpTmpF = fromMaybe "input_template.in" (input inp)
     workDir <- mkWorkDir
+    putStrLn $ "-- The work directory is: " ++ workDir
 
     let outfile = fromMaybe "output_h2_xs.dat" (output inp)
     withFile outfile WriteMode $ \h -> do
@@ -66,8 +67,9 @@ main = do
                     >-> getXSH2 sqrtS
                     >-> printXS h
 
+    putStrLn $ "-- "  ++ workDir ++ " will be removed."
     removeDirectoryRecursive workDir
-    putStrLn $ "-- " ++ outfile ++ " generated."
+    putStrLn $ "-- Done. The output file is " ++ outfile ++ "."
   where
     isValidExecutable exe = do
         exists <- doesFileExist exe
