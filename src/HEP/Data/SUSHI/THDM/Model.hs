@@ -33,11 +33,12 @@ import qualified Data.Text                   as T
 import qualified Data.Text.IO                as TIO
 import           Data.Text.Lazy.Builder      (Builder, fromText, singleton)
 import           Pipes
+import           System.Directory            (doesFileExist)
 import           System.FilePath             ((</>))
 
 import           Control.Monad               (forever)
 import           GHC.Generics                (Generic)
-import           System.IO                   (IOMode (..), withFile)
+import           System.IO
 
 data THDMType = TypeI | TypeII | UnknownType deriving (Eq, Generic)
 
@@ -132,10 +133,16 @@ getFiles = _files
 getParam :: ModelFiles -> InputParam
 getParam = _param
 
-getFile :: ([FilePath] -> FilePath) -> ModelFiles -> FilePath
-getFile f (ModelFiles files _) = f files
+getFile :: MonadIO m => ([FilePath] -> FilePath) -> ModelFiles -> m (Maybe FilePath)
+getFile select (ModelFiles files _) = do
+    let f = select files
+    exist <- liftIO $ doesFileExist f
+    if exist
+        then return (Just f)
+        else do liftIO $ hPutStrLn stderr "---- SusHi error!"
+                return Nothing
 
-getInputFile, getOutputFile :: ModelFiles -> FilePath
+getInputFile, getOutputFile :: MonadIO m => ModelFiles -> m (Maybe FilePath)
 getInputFile  = getFile head
 getOutputFile = getFile (head . tail)
 
