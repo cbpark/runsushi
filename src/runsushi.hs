@@ -8,7 +8,7 @@
 module Main where
 
 import           HEP.Data.SUSHI.THDM
-import           HEP.Data.Util
+import           HEP.Data.SUSHI.Util
 
 import           Data.Text.Lazy      (Text, pack)
 import           Data.Text.Lazy.IO   (hPutStrLn)
@@ -45,10 +45,10 @@ main = do
 
     let params = V.zipWith (\mHVal mSVal -> InputParam
                                             { _mdtyp = mdtypVal
-                                            , _mS    = mSVal
-                                            , _mH    = mHVal
-                                            , _mA    = mAVal
-                                            , _mHp   = mHpVal
+                                            , _mS    = Mass mSVal
+                                            , _mH    = Mass mHVal
+                                            , _mA    = Mass mAVal
+                                            , _mHp   = Mass mHpVal
                                             , _angs  = mkAngles tanbVal cosbaVal
                                             }) mHVals mSVals
 
@@ -67,7 +67,7 @@ main = do
 
     putStrLn $ "-- "  ++ workDir ++ " will be removed."
     removeDirectoryRecursive workDir
-    putStrLn $ "-- Done. The output file is " ++ outfile ++ "."
+    putStrLn $ "-- Done! The output file is " ++ outfile ++ "."
 
 data InputArgs w = InputArgs
     { sushi    :: w ::: FilePath       <?> "SuSHi executable (which sushi)"

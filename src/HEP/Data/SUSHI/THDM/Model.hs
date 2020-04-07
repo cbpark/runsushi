@@ -1,21 +1,12 @@
-{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
 module HEP.Data.SUSHI.THDM.Model
     (
-      InputParam (..)
+      module DK
+    , module DT
+
     , renderInputParam
-
-    , THDMType (..)
-    , fromIntToType
-
-    , Angles
-    , mkAngles
-    , tanBeta
-    , sin2Beta
-    , cosBetaAlpha
-    , sinBetaAlpha
 
     , ModelFiles
     , getFiles
@@ -26,8 +17,13 @@ module HEP.Data.SUSHI.THDM.Model
     , mkModelFiles
     ) where
 
+import           HEP.Data.SUSHI.Util
+
+import           HEP.Data.Kinematics         as DK
+import           HEP.Data.THDM               as DT
+
 import           Data.Double.Conversion.Text (toExponential, toFixed)
-import           Data.Hashable               (Hashable, hash)
+import           Data.Hashable               (hash)
 import           Data.Text                   (Text, replace)
 import qualified Data.Text                   as T
 import qualified Data.Text.IO                as TIO
@@ -37,33 +33,7 @@ import           System.Directory            (doesFileExist)
 import           System.FilePath             ((</>))
 
 import           Control.Monad               (forever)
-import           GHC.Generics                (Generic)
 import           System.IO
-
-data THDMType = TypeI | TypeII | UnknownType deriving (Eq, Generic)
-
-instance Hashable THDMType
-
-instance Show THDMType where
-    show mdtyp | mdtyp == TypeI  = "1"
-               | mdtyp == TypeII = "2"
-               | otherwise       = "0"
-
-fromIntToType :: Int -> THDMType
-fromIntToType n | n == 1    = TypeI
-                | n == 2    = TypeII
-                | otherwise = UnknownType
-{-# INLINE fromIntToType #-}
-
-data InputParam = InputParam { _mdtyp :: !THDMType
-                             , _mS    :: !Double
-                             , _mH    :: !Double
-                             , _mA    :: !Double
-                             , _mHp   :: !Double
-                             , _angs  :: !Angles
-                             } deriving (Generic, Show)
-
-instance Hashable InputParam
 
 renderInputParam :: InputParam -> Builder
 renderInputParam InputParam {..} =
@@ -81,40 +51,9 @@ renderTHDMType typ = let typ' | typ == TypeI  = '1'
                      in singleton typ'
 {-# INLINE renderTHDMType #-}
 
-renderMass :: Double -> Builder
-renderMass = fromText . toFixed 2
-
-newtype Angles = Angles (Double, Double) deriving (Show, Generic)
-
-instance Hashable Angles
-
-mkAngles :: Double -> Double -> Angles
-mkAngles tanb cosba = Angles (tanb, cosba)
-{-# INLINE mkAngles #-}
-
-tanBeta :: Angles -> Double
-tanBeta (Angles (tanb, _)) = tanb
-{-# INLINE tanBeta #-}
-
-sin2Beta :: Angles -> Double
-sin2Beta (Angles (tanb, _)) = 2 * tanb / (1 + tanb * tanb)
-{-# INLINE sin2Beta #-}
-
-cosBetaAlpha :: Angles -> Double
-cosBetaAlpha (Angles (_, cosba)) = cosba
-{-# INLINE cosBetaAlpha #-}
-
-sinBetaAlpha :: Angles -> Double
-sinBetaAlpha (Angles (tanb, cosba)) = let b = atan tanb
-                                          a = piHalf (b - acos cosba)
-                                      in sin (b - a)
-{-# INLINE sinBetaAlpha #-}
-
-piHalf :: Double -> Double
-piHalf th | th >=  pi12 = piHalf $! th - pi
-          | th <  -pi12 = piHalf $! th + pi
-          | otherwise   = th
-  where pi12 = pi / 2
+renderMass :: Mass -> Builder
+renderMass = fromText . toFixed 2 . getMass
+{-# INLINE renderMass #-}
 
 renderAngles :: Angles -> Builder
 renderAngles angs =
@@ -188,11 +127,11 @@ mkInputFile' sqrtS inpTmpF InputParam {..} = do
   where
     replaceECM   = replace "$ECM"      (toFixed 1 sqrtS)
     replaceTanb  = replace "$TANBETA"  (toFixed 1 (tanBeta _angs))
-    replaceMH    = replace "$MH"       (toExponential 7 _mH)
-    replaceMA    = replace "$MA"       (toExponential 7 _mA)
-    replaceMCH   = replace "$MCH"      (toExponential 7 _mHp)
+    replaceMH    = replace "$MH"       (toExponential 7 (getMass _mH))
+    replaceMA    = replace "$MA"       (toExponential 7 (getMass _mA))
+    replaceMCH   = replace "$MCH"      (toExponential 7 (getMass _mHp))
     replaceM12   = let sin2b = sin2Beta _angs
-                       m12 = sqrt $ 0.5 * _mS * _mS * sin2b
+                       m12 = sqrt $ 0.5 * massSq _mS * sin2b
                    in replace "$M12"   (toExponential 7 m12)
     replaceTYPE  = replace "$TYPE"     ((T.pack . show) _mdtyp)
     replaceSinBA = let sinba = sinBetaAlpha _angs

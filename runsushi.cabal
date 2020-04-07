@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1882ae95e80d60e2a791f3e89c3799bcd048ad4530dd72ff1185db8de648c528
+-- hash: 10708f54725deccf75a7d42754ed1c80ba78d854be23c480d69e2d23dc150338
 
 name:           runsushi
 version:        0.0.0.0
@@ -31,7 +31,7 @@ executable runsushi
       HEP.Data.SUSHI.THDM
       HEP.Data.SUSHI.THDM.CrossSection
       HEP.Data.SUSHI.THDM.Model
-      HEP.Data.Util
+      HEP.Data.SUSHI.Util
       Paths_runsushi
   hs-source-dirs:
       src
@@ -43,6 +43,7 @@ executable runsushi
     , directory
     , double-conversion
     , filepath
+    , h2decays
     , hashable
     , optparse-generic
     , pipes
@@ -59,7 +60,7 @@ executable runsushiHpW
       HEP.Data.SUSHI.THDM
       HEP.Data.SUSHI.THDM.CrossSection
       HEP.Data.SUSHI.THDM.Model
-      HEP.Data.Util
+      HEP.Data.SUSHI.Util
       Paths_runsushi
   hs-source-dirs:
       src

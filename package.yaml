@@ -23,6 +23,7 @@ dependencies:
   - random
   - text
   - vector
+  - h2decays
 
 executables:
   runsushi:
@@ -39,4 +40,3 @@ executables:
       - attoparsec
       - bytestring
       - optparse-generic
-      - h2decays
