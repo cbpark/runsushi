@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 534202cd43de531be772c4e4d30794f94e825e671330e466e727775d4c4ed77e
+-- hash: 1882ae95e80d60e2a791f3e89c3799bcd048ad4530dd72ff1185db8de648c528
 
 name:           runsushi
 version:        0.0.0.0
@@ -67,6 +67,7 @@ executable runsushiHpW
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
+    , bytestring
     , containers
     , directory
     , double-conversion
@@ -75,7 +76,6 @@ executable runsushiHpW
     , hashable
     , optparse-generic
     , pipes
-    , pipes-bytestring
     , process
     , random
     , text

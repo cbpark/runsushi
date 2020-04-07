@@ -8,7 +8,7 @@
 module Main where
 
 import           HEP.Data.SUSHI.THDM
-import           HEP.Data.Util       (mkPoints, mkWorkDir)
+import           HEP.Data.Util
 
 import           Data.Text.Lazy      (Text, pack)
 import           Data.Text.Lazy.IO   (hPutStrLn)
@@ -17,7 +17,7 @@ import           Options.Generic     hiding (Text)
 import           Pipes
 import           System.Directory
 
-import           Control.Monad       (unless, when)
+import           Control.Monad       (when)
 import           Data.Maybe          (fromMaybe)
 import           System.Exit         (die)
 import           System.IO           (IOMode (..), withFile)
@@ -28,8 +28,6 @@ main = do
 
     let sushiexe = sushi inp
     putStrLn $ "-- We use SuSHi: " ++ sushiexe
-    validExe <- isValidExecutable sushiexe
-    unless validExe $ die ("-- Invalid SuSHi executable: " ++ sushiexe)
 
     let mdtypVal = fromIntToType $ fromMaybe 2 (mtype inp)
     when (mdtypVal == UnknownType) $ die "The type must be either 1 or 2."
@@ -70,11 +68,6 @@ main = do
     putStrLn $ "-- "  ++ workDir ++ " will be removed."
     removeDirectoryRecursive workDir
     putStrLn $ "-- Done. The output file is " ++ outfile ++ "."
-  where
-    isValidExecutable exe = do
-        exists <- doesFileExist exe
-        isExec <- executable <$> getPermissions exe
-        return $ exists && isExec
 
 data InputArgs w = InputArgs
     { sushi    :: w ::: FilePath       <?> "SuSHi executable (which sushi)"

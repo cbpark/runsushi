@@ -36,6 +36,7 @@ executables:
     source-dirs: src
     ghc-options: -threaded
     dependencies:
+      - attoparsec
+      - bytestring
       - optparse-generic
-      - pipes-bytestring
       - h2decays
