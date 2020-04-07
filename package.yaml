@@ -13,6 +13,7 @@ ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
 dependencies:
   - base >= 4.12.0.0 && < 5
   - attoparsec
+  - bytestring
   - containers
   - directory
   - double-conversion
@@ -36,7 +37,4 @@ executables:
     main: runsushiHpW.hs
     source-dirs: src
     ghc-options: -threaded
-    dependencies:
-      - attoparsec
-      - bytestring
-      - optparse-generic
+    dependencies: optparse-generic

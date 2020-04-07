@@ -10,17 +10,14 @@ module Main where
 import           HEP.Data.SUSHI.THDM
 import           HEP.Data.SUSHI.Util
 
-import           HEP.Data.THDM.Parser             (parseBRH2')
-
-import           Data.Attoparsec.ByteString.Char8 (parseOnly)
-import           Data.ByteString.Char8            (pack)
-import qualified Data.Vector                      as V
+import qualified Data.Vector         as V
 import           Options.Generic
-import           System.Process
+import           Pipes
+import qualified Pipes.Prelude       as P
 
-import           Control.Monad                    (when)
-import           Data.Maybe                       (fromMaybe)
-import           System.Exit                      (die)
+import           Control.Monad       (when)
+import           Data.Maybe          (fromMaybe)
+import           System.Exit         (die)
 
 main :: IO ()
 main = do
@@ -53,12 +50,8 @@ main = do
                                             , _mHp   = Mass mHpVal
                                             , _angs  = mkAngles tanbVal cosbaVal
                                             }) mHVals mSVals
-        h2decayArgs = V.map paramToArgs params
 
-    (_, str, _) <- readProcessWithExitCode h2decaysExec (V.head h2decayArgs) ""
-    case parseOnly parseBRH2' (pack str) of
-        Left err -> print err
-        Right r  -> print r
+    runEffect $ each params >-> runh2decays h2decaysExec >-> P.print
 
 data InputArgs w = InputArgs
     { h2decays :: w ::: FilePath       <?> "the executable path of h2decays"

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 10708f54725deccf75a7d42754ed1c80ba78d854be23c480d69e2d23dc150338
+-- hash: 32cf0ad1a1b747f05f5c498e5fbe5cfad04a969d9f3f1f1f4ddc37e6b5f5e06a
 
 name:           runsushi
 version:        0.0.0.0
@@ -29,6 +29,7 @@ executable runsushi
   other-modules:
       HEP.Data.SLHA
       HEP.Data.SUSHI.THDM
+      HEP.Data.SUSHI.THDM.BranchingRatio
       HEP.Data.SUSHI.THDM.CrossSection
       HEP.Data.SUSHI.THDM.Model
       HEP.Data.SUSHI.Util
@@ -39,6 +40,7 @@ executable runsushi
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
+    , bytestring
     , containers
     , directory
     , double-conversion
@@ -58,6 +60,7 @@ executable runsushiHpW
   other-modules:
       HEP.Data.SLHA
       HEP.Data.SUSHI.THDM
+      HEP.Data.SUSHI.THDM.BranchingRatio
       HEP.Data.SUSHI.THDM.CrossSection
       HEP.Data.SUSHI.THDM.Model
       HEP.Data.SUSHI.Util
