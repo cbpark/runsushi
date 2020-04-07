@@ -2,3 +2,7 @@ resolver: lts-15.6
 
 packages:
 - .
+
+extra-deps:
+- git: git@github.com:cbpark/h2decays.git
+  commit: 6770a2006cef229acfb4f50805b17edeeb9898eb

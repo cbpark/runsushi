@@ -18,7 +18,6 @@ dependencies:
   - double-conversion
   - filepath
   - hashable
-  - optparse-generic
   - pipes
   - process
   - random
@@ -30,3 +29,13 @@ executables:
     main: runsushi.hs
     source-dirs: src
     ghc-options: -threaded
+    dependencies: optparse-generic
+
+  runsushiHpW:
+    main: runsushiHpW.hs
+    source-dirs: src
+    ghc-options: -threaded
+    dependencies:
+      - optparse-generic
+      - pipes-bytestring
+      - h2decays

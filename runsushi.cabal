@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 401ee0146d4239e3e3bb4586699dd5ca0ff5be6e7d763cb24742884c7ac19701
+-- hash: 534202cd43de531be772c4e4d30794f94e825e671330e466e727775d4c4ed77e
 
 name:           runsushi
 version:        0.0.0.0
@@ -46,6 +46,36 @@ executable runsushi
     , hashable
     , optparse-generic
     , pipes
+    , process
+    , random
+    , text
+    , vector
+  default-language: Haskell2010
+
+executable runsushiHpW
+  main-is: runsushiHpW.hs
+  other-modules:
+      HEP.Data.SLHA
+      HEP.Data.SUSHI.THDM
+      HEP.Data.SUSHI.THDM.CrossSection
+      HEP.Data.SUSHI.THDM.Model
+      HEP.Data.Util
+      Paths_runsushi
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -threaded
+  build-depends:
+      attoparsec
+    , base >=4.12.0.0 && <5
+    , containers
+    , directory
+    , double-conversion
+    , filepath
+    , h2decays
+    , hashable
+    , optparse-generic
+    , pipes
+    , pipes-bytestring
     , process
     , random
     , text
