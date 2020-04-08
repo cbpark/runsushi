@@ -63,7 +63,7 @@ main = do
             (\p -> runEffect $
                 runReaderP p (runh2decays h2decaysExec
                               >-> getBRHpW
-                              >-> runSushiHpW sqrtS workDir inpTmpF sushiExec)
+                              >-> runSushiWithBR sqrtS workDir inpTmpF sushiExec)
                 >-> printXS h) params
 
     case output inp of

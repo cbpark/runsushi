@@ -51,13 +51,13 @@ getBRHpW = do
                 Nothing        -> Nothing
                 Just BRH2 {..} -> Just _h2HpmW
 
-runSushiHpW :: MonadIO m
-            => Double
-            -> FilePath
-            -> FilePath
-            -> FilePath  -- ^ the executable path of SusHi
-            -> Pipe (Maybe Double) (Maybe Builder) (ReaderT InputParam m) ()
-runSushiHpW sqrtS workDir inpTmpF sushiexe = do
+runSushiWithBR :: MonadIO m
+               => Double
+               -> FilePath
+               -> FilePath
+               -> FilePath  -- ^ the executable path of SusHi
+               -> Pipe (Maybe Double) (Maybe Builder) (ReaderT InputParam m) ()
+runSushiWithBR sqrtS workDir inpTmpF sushiexe = do
     brHpW <- await
     case brHpW of
         Nothing -> yield Nothing
