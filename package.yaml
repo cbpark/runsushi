@@ -23,6 +23,7 @@ dependencies:
   - process
   - random
   - text
+  - transformers
   - vector
   - h2decays
 

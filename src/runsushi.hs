@@ -10,7 +10,6 @@ module Main where
 import           HEP.Data.SUSHI.THDM
 import           HEP.Data.SUSHI.Util
 
-import           Data.Text.Lazy      (Text, pack)
 import           Data.Text.Lazy.IO   (hPutStrLn)
 import qualified Data.Vector         as V
 import           Options.Generic     hiding (Text)
@@ -20,7 +19,7 @@ import           System.Directory
 import           Control.Monad       (when)
 import           Data.Maybe          (fromMaybe)
 import           System.Exit         (die)
-import           System.IO           (IOMode (..), withFile)
+import           System.IO           (IOMode (..), stdout, withFile)
 
 main :: IO ()
 main = do
@@ -56,18 +55,31 @@ main = do
     workDir <- mkWorkDir
     putStrLn $ "-- The work directory is: " ++ workDir
 
-    let outfile = fromMaybe "output_h2_xs.dat" (output inp)
-    withFile outfile WriteMode $ \h -> do
-        hPutStrLn h header
-        runEffect $ each params
-                    >-> mkModelFiles sqrtS workDir inpTmpF
-                    >-> runSushi sushiexe
-                    >-> getXSH2 sqrtS
-                    >-> printXS h
+    -- let outfile = fromMaybe "output_h2_xs.dat" (output inp)
+    -- withFile outfile WriteMode $ \h -> do
+    --     hPutStrLn h header
+    --     runEffect $ each params
+    --                 >-> mkModelFiles sqrtS workDir inpTmpF
+    --                 >-> runSushi sushiexe
+    --                 >-> getXSH2 sqrtS 1
+    --                 >-> printXS h
+
+    let writeOutput h = runEffect $ each params
+                        >-> mkModelFiles sqrtS workDir inpTmpF
+                        >-> runSushi sushiexe
+                        >-> getXSH2 sqrtS 1  -- branching fracion = 1 (i.e., no decay)
+                        >-> printXS h
+
+    case output inp of
+        Nothing      -> writeOutput stdout
+        Just outfile -> do withFile outfile WriteMode $ \h -> do
+                               hPutStrLn h ("# pp --> H\n" <> header)
+                               writeOutput h
+                           putStrLn $ "-- " ++ outfile ++ " generated."
 
     putStrLn $ "-- "  ++ workDir ++ " will be removed."
     removeDirectoryRecursive workDir
-    putStrLn $ "-- Done! The output file is " ++ outfile ++ "."
+    putStrLn "-- Done!"
 
 data InputArgs w = InputArgs
     { sushi    :: w ::: FilePath       <?> "SuSHi executable (which sushi)"
@@ -88,10 +100,3 @@ data InputArgs w = InputArgs
 
 instance ParseRecord (InputArgs Wrapped)
 deriving instance Show (InputArgs Unwrapped)
-
-header :: Text
-header = pack $ "# " <>
-         foldl1 (\v1 v2 -> v1 <> ", " <> v2)
-         (zipWith (\n v -> "(" <> show n <> ") " <> v) ([1..] :: [Int])
-          [ "type", "mS", "mH", "mA", "mHp", "tanb", "cosba"
-          , "sqrt(s)", "sigma(pp) (fb)", "sigma(gg)", "sigma(bb)" ])

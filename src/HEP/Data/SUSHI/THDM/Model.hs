@@ -78,7 +78,7 @@ getFile select (ModelFiles files _) = do
     exist <- liftIO $ doesFileExist f
     if exist
         then return (Just f)
-        else do liftIO $ hPutStrLn stderr "---- SusHi error!"
+        else do liftIO $ hPutStrLn stderr "---- error from SusHi!"
                 return Nothing
 
 getInputFile, getOutputFile :: MonadIO m => ModelFiles -> m (Maybe FilePath)

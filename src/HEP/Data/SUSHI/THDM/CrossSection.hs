@@ -27,13 +27,16 @@ data XSH2 = XSH2 { _xs    :: !Double
                  , _sqrtS :: !Double
                  }
 
-getXSH2 :: MonadIO m => Double -> Pipe ModelFiles (Maybe Builder) m ()
-getXSH2 sqrtS = forever $ do
+getXSH2 :: MonadIO m
+        => Double  -- ^ sqrt(s)
+        -> Double  -- ^ branching fraction
+        -> Pipe ModelFiles (Maybe Builder) m ()
+getXSH2 sqrtS br = forever $ do
     modelFiles <- await
-    lift (getXSH2' sqrtS modelFiles) >>= yield
+    lift (getXSH2' sqrtS br modelFiles) >>= yield
 
-getXSH2' :: MonadIO m => Double -> ModelFiles -> m (Maybe Builder)
-getXSH2' sqrtS modelFiles = do
+getXSH2' :: MonadIO m => Double -> Double ->ModelFiles -> m (Maybe Builder)
+getXSH2' sqrtS br modelFiles = do
     mfile <- getOutputFile modelFiles
     case mfile of
         Nothing -> return Nothing
@@ -43,8 +46,8 @@ getXSH2' sqrtS modelFiles = do
                 xs = case slha of
                          Left  _      -> nullXSH2
                          Right blocks ->
-                             let xsGG = 1000 * numValueOf "SUSHIggh" 1 blocks
-                                 xsBB = 1000 * numValueOf "SUSHIbbh" 1 blocks
+                             let xsGG = br * 1000 * numValueOf "SUSHIggh" 1 blocks
+                                 xsBB = br * 1000 * numValueOf "SUSHIbbh" 1 blocks
                              in XSH2 { _xs    = xsGG + xsBB
                                      , _xsGG  = xsGG
                                      , _xsBB  = xsBB

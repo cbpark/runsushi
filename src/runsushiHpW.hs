@@ -10,14 +10,17 @@ module Main where
 import           HEP.Data.SUSHI.THDM
 import           HEP.Data.SUSHI.Util
 
+import           Data.Text.Lazy.IO   (hPutStrLn)
 import qualified Data.Vector         as V
 import           Options.Generic
 import           Pipes
-import qualified Pipes.Prelude       as P
+import           Pipes.Lift          (runReaderP)
+import           System.Directory    (removeDirectoryRecursive)
 
 import           Control.Monad       (when)
 import           Data.Maybe          (fromMaybe)
 import           System.Exit         (die)
+import           System.IO           (IOMode (..), stdout, withFile)
 
 main :: IO ()
 main = do
@@ -51,7 +54,28 @@ main = do
                                             , _angs  = mkAngles tanbVal cosbaVal
                                             }) mHVals mSVals
 
-    runEffect $ each params >-> runh2decays h2decaysExec >-> P.print
+    let inpTmpF = fromMaybe "input_template.in" (input inp)
+    workDir <- mkWorkDir
+    putStrLn $ "-- The work directory is: " ++ workDir
+
+    let writeOutput h =
+            V.mapM_
+            (\p -> runEffect $
+                runReaderP p (runh2decays h2decaysExec
+                              >-> getBRHpW
+                              >-> runSushiHpW sqrtS workDir inpTmpF sushiExec)
+                >-> printXS h) params
+
+    case output inp of
+        Nothing      -> writeOutput stdout
+        Just outfile -> do withFile outfile WriteMode $ \h -> do
+                               hPutStrLn h ("# pp --> H --> H^\\pm W^\\mp\n" <> header)
+                               writeOutput h
+                           putStrLn $ "-- " ++ outfile ++ " generated."
+
+    putStrLn $ "-- "  ++ workDir ++ " will be removed."
+    removeDirectoryRecursive workDir
+    putStrLn "-- Done!"
 
 data InputArgs w = InputArgs
     { h2decays :: w ::: FilePath       <?> "the executable path of h2decays"
@@ -73,7 +97,3 @@ data InputArgs w = InputArgs
 
 instance ParseRecord (InputArgs Wrapped)
 deriving instance Show (InputArgs Unwrapped)
-
-    -- let outputh2Decays = brh2 inp
-    -- withFile outputh2Decays ReadMode $ \h ->
-    --     runEffect $ (parseBRH2 . fromHandle) h >-> P.print
