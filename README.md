@@ -1,11 +1,13 @@
 # runsushi
 
+This is to process the input and output of [SusHi](https://sushi.hepforge.org/) and [h2decays](https://github.com/cbpark/h2decays) to obtain the cross sections of heavy Higgs bosons in the two-Higgs-doublet model.
+
 ## Requirement
 
 * [SusHi](https://sushi.hepforge.org/) linking with [2HDMC](https://2hdmc.hepforge.org/) 1.7.0: make sure that it has been built with `make predef=2HDMC`.
 * [h2decays](https://github.com/cbpark/h2decays): [stack](https://docs.haskellstack.org/en/stable/README/) users can install it without building it explicitly. See [`stack.yaml`](./stack.yaml).
 
-See the patches for `SusHi` and `2HDMC`:
+See the patches for building SusHi and 2HDMC:
 
 * [`sushi_gsl_path_fix.patch`](https://gist.github.com/cbpark/ada5742bd68891e1481dd8d8e1aa9861),
 * [`2HDMC_170.patch`](https://gist.github.com/cbpark/fc05adadbd52c3fb0319be28dcdc1c1b).
