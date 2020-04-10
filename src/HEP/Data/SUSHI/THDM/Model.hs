@@ -38,10 +38,10 @@ import           System.IO
 renderInputParam :: InputParam -> Builder
 renderInputParam InputParam {..} =
     renderTHDMType _mdtyp
-    <> space <> renderMass _mS
     <> space <> renderMass _mH
     <> space <> renderMass _mA
     <> space <> renderMass _mHp
+    <> space <> renderMass _m12
     <> space <> renderAngles _angs
 
 renderTHDMType :: THDMType -> Builder
@@ -130,9 +130,7 @@ mkInputFile' sqrtS inpTmpF InputParam {..} = do
     replaceMH    = replace "$MH"       (toExponential 7 (getMass _mH))
     replaceMA    = replace "$MA"       (toExponential 7 (getMass _mA))
     replaceMCH   = replace "$MCH"      (toExponential 7 (getMass _mHp))
-    replaceM12   = let sin2b = sin2Beta _angs
-                       m12 = sqrt $ 0.5 * massSq _mS * sin2b
-                   in replace "$M12"   (toExponential 7 m12)
+    replaceM12   = replace "$M12"      (toExponential 7 (getMass _m12))
     replaceTYPE  = replace "$TYPE"     ((T.pack . show) _mdtyp)
     replaceSinBA = let sinba = sinBetaAlpha _angs
                    in replace "$SINBA" (toExponential 7 sinba)

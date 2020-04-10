@@ -29,7 +29,7 @@ $ runsushi --help
 Run SuSHi to obtain the cross sections
 
 Usage: runsushi --sushi STRING [--input STRING] [--eCM DOUBLE] [--mtype INT]
-                [--mH DOUBLE...] [--mA DOUBLE] --mHp DOUBLE [--mS DOUBLE]
+                [--mH DOUBLE...] [--mA DOUBLE] --mHp DOUBLE [--m12 DOUBLE]
                 --tanb DOUBLE --cosba DOUBLE [--stepsize DOUBLE]
                 [--output STRING]
 
@@ -43,18 +43,18 @@ Available options:
   --mH DOUBLE...           heavy Higgs mass
   --mA DOUBLE              CP-odd Higgs mass
   --mHp DOUBLE             charged Higgs mass
-  --mS DOUBLE              heavy mass scale (m_A if MSSM)
+  --m12 DOUBLE             soft Z2 breaking term
   --tanb DOUBLE            tan(beta)
   --cosba DOUBLE           cos(beta-alpha)
   --stepsize DOUBLE        step size (default: 0.5)
   --output STRING          the name of the output file
 
 $ runsushiHpW --help
-Run SusHi and h2decays to obtain the cross sections
+Run SusHi and h2decays to obtain the cross sections (H+ W-)
 
 Usage: runsushiHpW --h2decays STRING --sushi STRING [--input STRING]
                    [--eCM DOUBLE] [--mtype INT] [--mH DOUBLE...] [--mA DOUBLE]
-                   --mHp DOUBLE [--mS DOUBLE] --tanb DOUBLE --cosba DOUBLE
+                   --mHp DOUBLE [--m12 DOUBLE] --tanb DOUBLE --cosba DOUBLE
                    [--stepsize DOUBLE] [--output STRING]
 
 Available options:
@@ -68,7 +68,7 @@ Available options:
   --mH DOUBLE...           heavy Higgs mass
   --mA DOUBLE              CP-odd Higgs mass
   --mHp DOUBLE             charged Higgs mass
-  --mS DOUBLE              heavy mass scale (m_A if MSSM)
+  --m12 DOUBLE             soft Z2 breaking term
   --tanb DOUBLE            tan(beta)
   --cosba DOUBLE           cos(beta-alpha)
   --stepsize DOUBLE        step size (default: 0.5)

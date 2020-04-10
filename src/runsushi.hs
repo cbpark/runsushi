@@ -29,27 +29,28 @@ main = do
     putStrLn $ "-- We use SuSHi: " ++ sushiexe
 
     let mdtypVal = fromIntToType $ fromMaybe 2 (mtype inp)
-    when (mdtypVal == UnknownType) $ die "The type must be either 1 or 2."
+    when (mdtypVal == UnknownType) $ die "-- The type must be either 1 or 2."
 
     let sqrtS = fromMaybe 13000 (eCM inp)
         step = fromMaybe 0.5 (stepsize inp)
+        (tanbVal, cosbaVal) = (,) <$> tanb <*> cosba $ inp
         (mHVals, npoints) = mkPoints step (mH inp)
-        mSVals = fromMaybe mHVals (V.replicateM npoints (mS inp))
         mHpVal = mHp inp
         mAVal = fromMaybe mHpVal (mA inp)
-        (tanbVal, cosbaVal) = (,) <$> tanb <*> cosba $ inp
+        m12Vals = fromMaybe (defaultM12 tanbVal <$> mHVals)
+                  (V.replicateM npoints (m12 inp))
 
     putStrLn $ "-- m_{H+} = " ++ show mHpVal ++ ", tan(beta) = " ++ show tanbVal
         ++ ", cos(beta - alpha) = " ++ show cosbaVal
 
-    let params = V.zipWith (\mHVal mSVal -> InputParam
-                                            { _mdtyp = mdtypVal
-                                            , _mS    = Mass mSVal
-                                            , _mH    = Mass mHVal
-                                            , _mA    = Mass mAVal
-                                            , _mHp   = Mass mHpVal
-                                            , _angs  = mkAngles tanbVal cosbaVal
-                                            }) mHVals mSVals
+    let params = V.zipWith (\mHVal m12Val -> InputParam
+                                             { _mdtyp = mdtypVal
+                                             , _mH    = Mass mHVal
+                                             , _mA    = Mass mAVal
+                                             , _mHp   = Mass mHpVal
+                                             , _m12   = Mass m12Val
+                                             , _angs  = mkAngles tanbVal cosbaVal
+                                             }) mHVals m12Vals
 
     let inpTmpF = fromMaybe "input_template.in" (input inp)
     workDir <- mkWorkDir
@@ -91,7 +92,7 @@ data InputArgs w = InputArgs
     , mH       :: w ::: [Double]       <?> "heavy Higgs mass"
     , mA       :: w ::: Maybe Double   <?> "CP-odd Higgs mass"
     , mHp      :: w ::: Double         <?> "charged Higgs mass"
-    , mS       :: w ::: Maybe Double   <?> "heavy mass scale (m_A if MSSM)"
+    , m12      :: w ::: Maybe Double   <?> "soft Z2 breaking term"
     , tanb     :: w ::: Double         <?> "tan(beta)"
     , cosba    :: w ::: Double         <?> "cos(beta-alpha)"
     , stepsize :: w ::: Maybe Double   <?> "step size (default: 0.5)"

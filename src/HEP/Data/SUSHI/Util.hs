@@ -19,5 +19,5 @@ header :: Text
 header = pack $ "# " <>
          foldl1 (\v1 v2 -> v1 <> ", " <> v2)
          (zipWith (\n v -> "(" <> show n <> ") " <> v) ([1..] :: [Int])
-          [ "type", "mS", "mH", "mA", "mHp", "tanb", "cosba"
+          [ "type", "mH", "mA", "mHp", "m12", "tanb", "cosba"
           , "sqrt(s)", "sigma(pp) (fb)", "sigma(gg)", "sigma(bb)" ])
