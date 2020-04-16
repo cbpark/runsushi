@@ -1,8 +1,8 @@
-resolver: lts-15.7
+resolver: lts-15.8
 
 packages:
 - .
 
 extra-deps:
 - git: git@github.com:cbpark/h2decays.git
-  commit: f27cdf4c8adb4dd39ba7d869d3290480c5fb8dfe
+  commit: 6c447e1c25797bdf45d244339df3d12efdbafd73
