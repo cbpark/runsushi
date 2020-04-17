@@ -7,8 +7,8 @@ mkDerivation {
   version = "0.0.0.0";
   src = fetchgit {
     url = "git@github.com:cbpark/h2decays";
-    sha256 = "021zhzhyrama1w3qs10nj3cyfz5knzhx0wr1c3sgmywa4acj071s";
-    rev = "f27cdf4c8adb4dd39ba7d869d3290480c5fb8dfe";
+    sha256 = "0rs0ya2cpf7chb8ljwl41f9zq0afbilf0qd6vna1i6c050yyf8sv";
+    rev = "facc1e2a02c802877c7f1c0819695cabbbf78225";
     fetchSubmodules = true;
   };
   isLibrary = true;

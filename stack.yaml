@@ -5,4 +5,4 @@ packages:
 
 extra-deps:
 - git: git@github.com:cbpark/h2decays.git
-  commit: 6c447e1c25797bdf45d244339df3d12efdbafd73
+  commit: facc1e2a02c802877c7f1c0819695cabbbf78225

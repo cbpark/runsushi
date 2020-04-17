@@ -7,7 +7,7 @@ module HEP.Data.SUSHI.THDM.BranchingRatio
 
 import HEP.Data.SUSHI.THDM.CrossSection (getXSH2, runSushi)
 import HEP.Data.SUSHI.THDM.Model        (BRH2 (..), InputParam, mkModelFiles,
-                                         paramToArgs)
+                                         paramToArgsH2)
 
 import HEP.Data.THDM.Parser             (parseBRH2)
 
@@ -21,7 +21,7 @@ import System.Process                   (readProcessWithExitCode)
 runh2decays :: MonadIO m
              => FilePath -> Producer (Maybe BRH2) (ReaderT InputParam m) ()
 runh2decays h2decaysExe = do
-    inputArgs <- paramToArgs <$> lift ask
+    inputArgs <- paramToArgsH2 <$> lift ask
     (_, brs0, _) <- liftIO (readProcessWithExitCode h2decaysExe inputArgs "")
     case parseOnly parseBRH2 (pack brs0) of
         Left _         -> do liftIO . putStrLn $ "---- error from h2decays!"
